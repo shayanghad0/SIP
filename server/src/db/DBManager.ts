@@ -76,7 +76,20 @@ export class DBManager {
         return JSON.parse(data);
       }
     } catch (error) {
-      console.error(`Failed to load ${collection}:`, error);
+      console.error(`Failed to load ${collection}, trying backup...`, error);
+      // Try to restore from backup
+      const backupPath = filePath + '.backup';
+      if (fs.existsSync(backupPath)) {
+        try {
+          const backupData = fs.readFileSync(backupPath, 'utf-8');
+          const parsed = JSON.parse(backupData);
+          // Restore backup to main file
+          fs.writeFileSync(filePath, backupData, 'utf-8');
+          return parsed;
+        } catch (backupError) {
+          console.error(`Failed to load backup for ${collection}:`, backupError);
+        }
+      }
     }
     return [];
   }

@@ -1,8 +1,9 @@
+// src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import { LoadingScreen } from './components/ui';
+import { LoadingScreen, Button } from './components/ui';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { useAuthStore, isTokenValid } from './store/authStore';
 import db from './services/database';
@@ -35,19 +36,70 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// ===== InstallGuard with FULL error handling =====
 const InstallGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
+  const [state, setState] = useState<{
+    loading: boolean;
+    installed: boolean | null;
+    error: string | null;
+  }>({
+    loading: true,
+    installed: null,
+    error: null,
+  });
 
   useEffect(() => {
     const check = async () => {
-      const installed = await db.isInstalled();
-      setIsInstalled(installed);
+      try {
+        const installed = await db.isInstalled();
+        setState({ loading: false, installed, error: null });
+      } catch (err: any) {
+        setState({
+          loading: false,
+          installed: false,
+          error: err.message || 'خطا در اتصال به سرور',
+        });
+      }
     };
     check();
   }, []);
 
-  if (isInstalled === null) return <LoadingScreen message="در حال بارگذاری..." />;
-  if (!isInstalled) return <Navigate to="/install" replace />;
+  if (state.loading) {
+    return <LoadingScreen message="در حال بارگذاری..." />;
+  }
+
+  if (state.error) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 mx-auto bg-red-500/20 rounded-2xl flex items-center justify-center mb-4">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h2 className="text-2xl font-bold text-red-400 mb-4">خطا در اتصال</h2>
+          <p className="text-dark-400 mb-6">{state.error}</p>
+          <p className="text-dark-500 text-sm mb-6">
+            لطفاً مطمئن شوید که سرور در حال اجراست (پورت ۳۰۰۱) و سپس دوباره تلاش کنید.
+          </p>
+          <Button onClick={() => window.location.reload()}>تلاش مجدد</Button>
+          <button
+            className="block w-full mt-3 text-dark-500 text-sm hover:text-dark-300 transition-colors"
+            onClick={() => {
+              // Force to installation page if user wants to reinstall
+              db.resetInstallationCache();
+              window.location.href = '/install';
+            }}
+          >
+            ↻ بازنشانی و نصب مجدد
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!state.installed) {
+    return <Navigate to="/install" replace />;
+  }
+
   return <>{children}</>;
 };
 

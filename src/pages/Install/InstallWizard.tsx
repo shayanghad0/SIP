@@ -1,3 +1,4 @@
+// src/pages/Install/InstallWizard.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -231,7 +232,7 @@ export const InstallWizard: React.FC = () => {
       id: generateId(),
       fullName: consultantForm.fullName.trim(),
       username: consultantForm.username.trim(),
-      password: consultantForm.password, // will be hashed on server
+      password: consultantForm.password,
       role: 'consultant',
       assignedGrades: [],
       createdAt: new Date().toISOString(),
@@ -264,7 +265,7 @@ export const InstallWizard: React.FC = () => {
       id: generateId(),
       fullName: `خانواده ${studentForm.fullName}`,
       username: parentUsername,
-      password: parentPassword, // will be hashed on server
+      password: parentPassword,
       role: 'parent',
       studentIds: [],
       createdAt: new Date().toISOString(),
@@ -275,7 +276,7 @@ export const InstallWizard: React.FC = () => {
       id: generateId(),
       fullName: studentForm.fullName.trim(),
       username: studentForm.username.trim(),
-      password: studentForm.password, // will be hashed on server
+      password: studentForm.password,
       role: 'student',
       gradeId: studentForm.gradeId,
       classId: studentForm.classId,
@@ -340,7 +341,7 @@ export const InstallWizard: React.FC = () => {
       id: generateId(),
       fullName: teacherForm.fullName.trim(),
       username: teacherForm.username.trim(),
-      password: teacherForm.password, // will be hashed on server
+      password: teacherForm.password,
       role: 'teacher',
       assignments: validAssignments,
       createdAt: new Date().toISOString(),
@@ -353,7 +354,7 @@ export const InstallWizard: React.FC = () => {
     toast.success('دبیر اضافه شد');
   };
 
-  // Finish Installation (using API)
+  // Finish Installation
   const finishInstallation = async () => {
     setIsProcessing(true);
 
@@ -389,6 +390,7 @@ export const InstallWizard: React.FC = () => {
       };
 
       await db.finishInstallation(installData);
+      db.resetInstallationCache();
       toast.success('نصب با موفقیت انجام شد!');
       handleNext();
     } catch (error) {
@@ -404,8 +406,6 @@ export const InstallWizard: React.FC = () => {
     if (!validateAdmin()) return;
     setIsProcessing(true);
     try {
-      // We'll just call finish with empty data and then use the demo generation on server if needed
-      // For simplicity, we redirect to normal install flow
       toast.error('ویژگی داده‌های نمونه در نسخه API در حال توسعه است');
       setIsProcessing(false);
     } catch (error) {
@@ -424,6 +424,7 @@ export const InstallWizard: React.FC = () => {
     return grade?.classes || [];
   };
 
+  // ===== UPDATED VALIDATION: Step 4 now required =====
   const validateCurrentStep = (): boolean => {
     switch (currentStep) {
       case 1:
@@ -441,6 +442,12 @@ export const InstallWizard: React.FC = () => {
           return false;
         }
         return true;
+      case 4:
+        if (books.length === 0) {
+          toast.error('حداقل یک درس باید اضافه شود (الزامی)');
+          return false;
+        }
+        return true;
       default:
         return true;
     }
@@ -454,7 +461,7 @@ export const InstallWizard: React.FC = () => {
     }
   };
 
-  // Render step content (kept as in original, only finishInstallation changed)
+  // ===== Render Step Content =====
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -508,6 +515,7 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
       case 2:
         return (
           <div className="space-y-6">
@@ -546,6 +554,7 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
       case 3:
         return (
           <div className="space-y-6">
@@ -596,6 +605,8 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
+      // ===== STEP 4 - UPDATED: Removed "اختیاری" and made mandatory =====
       case 4:
         return (
           <div className="space-y-6">
@@ -604,7 +615,9 @@ export const InstallWizard: React.FC = () => {
                 <BookOpen className="w-8 h-8 text-primary-400" />
               </div>
               <h2 className="text-2xl font-bold text-dark-100">دروس</h2>
-              <p className="text-dark-400 mt-2">دروس مدرسه را با درجه اهمیت اضافه کنید (اختیاری)</p>
+              <p className="text-dark-400 mt-2">
+                دروس مدرسه را با درجه اهمیت اضافه کنید <span className="text-red-400 font-bold">(الزامی)</span>
+              </p>
             </div>
             <div className="flex gap-3">
               <Input
@@ -640,8 +653,14 @@ export const InstallWizard: React.FC = () => {
                 </div>
               ))}
             </div>
+            {books.length === 0 && (
+              <div className="text-center py-4 text-dark-500 text-sm">
+                هنوز درسی اضافه نشده است. حداقل یک درس اضافه کنید.
+              </div>
+            )}
           </div>
         );
+
       case 5:
         return (
           <div className="space-y-6">
@@ -686,6 +705,7 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
       case 6:
         return (
           <div className="space-y-6">
@@ -764,6 +784,7 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
       case 7:
         return (
           <div className="space-y-6">
@@ -851,6 +872,7 @@ export const InstallWizard: React.FC = () => {
             </div>
           </div>
         );
+
       case 8:
         return (
           <div className="space-y-6">
@@ -884,11 +906,13 @@ export const InstallWizard: React.FC = () => {
             </Button>
           </div>
         );
+
       default:
         return null;
     }
   };
 
+  // ===== Render =====
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
@@ -938,7 +962,7 @@ export const InstallWizard: React.FC = () => {
                 loading={isProcessing}
                 icon={currentStep === 7 ? <CheckCircle className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
               >
-                {currentStep === 7 ? 'اتمام نصب' : currentStep === 4 ? 'بعدی / رد کردن' : 'بعدی'}
+                {currentStep === 7 ? 'اتمام نصب' : currentStep === 4 ? 'بعدی' : 'بعدی'}
               </Button>
             </div>
           )}

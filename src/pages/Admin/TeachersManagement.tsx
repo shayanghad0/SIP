@@ -1,3 +1,4 @@
+// src/pages/Admin/TeachersManagement.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -22,6 +23,7 @@ interface TeacherFormData {
 
 export const TeachersManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [grades, setGrades] = useState<any[]>([]);
   const [books, setBooks] = useState<any[]>([]);
@@ -42,11 +44,13 @@ export const TeachersManagement: React.FC = () => {
           db.getGrades(),
           db.getBooks(),
         ]);
-        setTeachers(teachersData);
-        setGrades(gradesData);
-        setBooks(booksData);
-      } catch (error) {
-        console.error('Failed to load teachers:', error);
+        setTeachers(teachersData || []);
+        setGrades(gradesData || []);
+        setBooks(booksData || []);
+        setError(null);
+      } catch (err: any) {
+        console.error('Failed to load teachers:', err);
+        setError('خطا در بارگیری اطلاعات. لطفاً مطمئن شوید سرور در حال اجراست.');
         toast.error('خطا در بارگیری اطلاعات');
       } finally {
         setLoading(false);
@@ -63,10 +67,16 @@ export const TeachersManagement: React.FC = () => {
   }, [teachers, searchTerm]);
 
   const teachersWithAnalysis = useMemo(() => {
-    return filteredTeachers.map(teacher => ({
-      teacher,
-      analysis: analyzeTeacherPerformance(teacher.id),
-    }));
+    if (teachers.length === 0) return [];
+    return filteredTeachers.map(teacher => {
+      let analysis;
+      try {
+        analysis = analyzeTeacherPerformance(teacher.id);
+      } catch (e) {
+        analysis = { averageClassScore: 0, improvementRate: 0, homeworkCompletionRate: 0, examDifficulty: 50, effectiveness: 0 };
+      }
+      return { teacher, analysis };
+    });
   }, [filteredTeachers]);
 
   const addAssignment = () => {
@@ -96,7 +106,7 @@ export const TeachersManagement: React.FC = () => {
         id: generateId(),
         fullName: data.fullName,
         username: data.username,
-        password: data.password, // plain, server will hash
+        password: data.password, // server will hash
         role: 'teacher',
         assignments: validAssignments,
         createdAt: new Date().toISOString(),
@@ -110,21 +120,22 @@ export const TeachersManagement: React.FC = () => {
       reset();
       setAssignments([]);
       toast.success(`دبیر ${data.fullName} اضافه شد`);
-    } catch (error) {
+    } catch (err) {
+      console.error('Add teacher error:', err);
       toast.error('خطا در افزودن دبیر');
     }
   };
 
   const handleDelete = async (teacher: Teacher) => {
-    if (window.confirm(`آیا از حذف ${teacher.fullName} اطمینان دارید؟`)) {
-      try {
-        await db.deleteTeacher(teacher.id);
-        const updated = await db.getTeachers();
-        setTeachers(updated);
-        toast.success('دبیر حذف شد');
-      } catch {
-        toast.error('خطا در حذف');
-      }
+    if (!window.confirm(`آیا از حذف ${teacher.fullName} اطمینان دارید؟`)) return;
+    try {
+      await db.deleteTeacher(teacher.id);
+      const updated = await db.getTeachers();
+      setTeachers(updated);
+      toast.success('دبیر حذف شد');
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast.error('خطا در حذف');
     }
   };
 
@@ -136,6 +147,15 @@ export const TeachersManagement: React.FC = () => {
   const selectedTeacherAnalysis = selectedTeacher ? analyzeTeacherPerformance(selectedTeacher.id) : null;
 
   if (loading) return <LoadingScreen message="در حال بارگذاری دبیران..." />;
+  if (error) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="text-center max-w-md">
+        <div className="text-red-400 text-4xl mb-4">⚠️</div>
+        <p className="text-dark-200">{error}</p>
+        <Button className="mt-4" onClick={() => window.location.reload()}>تلاش مجدد</Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -208,7 +228,7 @@ export const TeachersManagement: React.FC = () => {
         </Card>
       )}
 
-      {/* Modal for adding teacher */}
+      {/* Add Teacher Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="افزودن دبیر جدید" size="lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
