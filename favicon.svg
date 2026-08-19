@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <style>
+      .gradient-bg {
+        fill: url(#blueGradient);
+      }
+    </style>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect class="gradient-bg" width="48" height="48" rx="12"/>
+  
+  <!-- Brain Circuit Icon -->
+  <g transform="translate(24, 24)">
+    <path d="M-6-10a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0-6-6Z" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-3-7a4.5 4.5 0 0 0 3-4" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-6.003-4.875A3 3 0 0 0-5.599-3.5" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-9.477-4.104a4 4 0 0 1 .585-.396" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-6 6a4 4 0 0 1-1.967-.516" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0-7h4" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0-2h6a2 2 0 0 1 2 2v1" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M0-12h8" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M4-12V-15a2 2 0 0 1 2-2" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="4" cy="-7" r=".5" fill="white"/>
+    <circle cx="6" cy="-15" r=".5" fill="white"/>
+    <circle cx="8" cy="5" r=".5" fill="white"/>
+    <circle cx="8" cy="-4" r=".5" fill="white"/>
+  </g>
+</svg>
