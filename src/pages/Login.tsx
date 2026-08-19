@@ -1,8 +1,8 @@
-import { AlertTriangle, BrainCircuit, ChevronDown, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
+import { AlertTriangle, BrainCircuit, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { login, listQuickAccounts } from "../lib/api";
+import { login } from "../lib/api";
 import { faDate } from "../lib/format";
 import { Button, Field, Input, notify } from "../components/ui";
 
@@ -14,8 +14,6 @@ interface LoginForm {
 export default function Login() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [showAccounts, setShowAccounts] = useState(false);
-  const accounts = listQuickAccounts();
   const {
     register,
     handleSubmit,
@@ -70,31 +68,6 @@ export default function Login() {
                 ورود به داشبورد
               </Button>
             </form>
-
-            {accounts.length > 0 && (
-              <div className="mt-5 border-t border-slate-800/70 pt-4">
-                <button onClick={() => setShowAccounts((s) => !s)} className="flex items-center gap-1.5 text-[12px] font-medium text-blue-300 hover:text-blue-200 cursor-pointer">
-                  <ChevronDown size={13} className={showAccounts ? "rotate-180 transition" : "transition"} />
-                  {showAccounts ? "بستن فهرست حساب‌ها" : "نمایش حساب‌های موجود (برای ورود سریع در دمو)"}
-                </button>
-                {showAccounts && (
-                  <div className="mt-3 max-h-44 space-y-1 overflow-y-auto pl-1">
-                    {accounts.map((a, i) => (
-                      <button
-                        key={`${a.username}-${i}`}
-                        onClick={() => setValue("username", a.username)}
-                        className="flex w-full items-center justify-between rounded-lg border border-slate-800 bg-white/[0.03] px-3 py-2 text-[12px] transition hover:border-blue-500/40 hover:bg-blue-500/10 cursor-pointer"
-                      >
-                        <span className="text-slate-200">{a.name}</span>
-                        <span className="text-slate-500">
-                          {a.role} • <span dir="ltr">{a.username}</span>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
           <p className="mt-4 text-center text-[11px] text-slate-600">{faDate(new Date().toISOString())} — نسخه نمایشی SIP</p>
         </div>
