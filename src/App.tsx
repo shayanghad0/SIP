@@ -7,7 +7,6 @@ import { DashboardLayout } from './components/layout/DashboardLayout';
 import { useAuthStore, isTokenValid } from './store/authStore';
 import db from './services/database';
 
-// Pages
 import { InstallWizard } from './pages/Install/InstallWizard';
 import { LoginPage } from './pages/Login/LoginPage';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
@@ -19,7 +18,6 @@ import { ConsultantDashboard } from './pages/Consultant/ConsultantDashboard';
 import { ParentDashboard } from './pages/Parent/ParentDashboard';
 import { StudentDashboard } from './pages/Student/StudentDashboard';
 
-// Placeholder pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="text-center">
@@ -29,37 +27,27 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   </div>
 );
 
-// Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, token } = useAuthStore();
-
   if (!isAuthenticated || !token || !isTokenValid(token)) {
     return <Navigate to="/login" replace />;
   }
-
   return <>{children}</>;
 };
 
-// Install Guard
 const InstallGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkInstallation = () => {
-      const installed = db.isInstalled();
+    const check = async () => {
+      const installed = await db.isInstalled();
       setIsInstalled(installed);
     };
-    checkInstallation();
+    check();
   }, []);
 
-  if (isInstalled === null) {
-    return <LoadingScreen message="در حال بارگذاری..." />;
-  }
-
-  if (!isInstalled) {
-    return <Navigate to="/install" replace />;
-  }
-
+  if (isInstalled === null) return <LoadingScreen message="در حال بارگذاری..." />;
+  if (!isInstalled) return <Navigate to="/install" replace />;
   return <>{children}</>;
 };
 
@@ -68,16 +56,13 @@ const App: React.FC = () => {
   const { user, isAuthenticated, token, logout } = useAuthStore();
 
   useEffect(() => {
-    // Check token validity on app load
     if (isAuthenticated && token && !isTokenValid(token)) {
       logout();
     }
     setIsLoading(false);
   }, [isAuthenticated, token, logout]);
 
-  if (isLoading) {
-    return <LoadingScreen message="در حال بارگذاری..." />;
-  }
+  if (isLoading) return <LoadingScreen message="در حال بارگذاری..." />;
 
   return (
     <BrowserRouter>
@@ -91,31 +76,12 @@ const App: React.FC = () => {
             border: '1px solid #334155',
             borderRadius: '12px',
           },
-          success: {
-            iconTheme: {
-              primary: '#22c55e',
-              secondary: '#1e293b',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#1e293b',
-            },
-          },
+          success: { iconTheme: { primary: '#22c55e', secondary: '#1e293b' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#1e293b' } },
         }}
       />
-
       <Routes>
-        {/* Installation Route */}
-        <Route
-          path="/install"
-          element={
-            db.isInstalled() ? <Navigate to="/login" replace /> : <InstallWizard />
-          }
-        />
-
-        {/* Login Route */}
+        <Route path="/install" element={<InstallWizard />} />
         <Route
           path="/login"
           element={
@@ -128,8 +94,6 @@ const App: React.FC = () => {
             </InstallGuard>
           }
         />
-
-        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -149,8 +113,6 @@ const App: React.FC = () => {
           <Route path="ai-reports" element={<PlaceholderPage title="گزارشات هوشمند" />} />
           <Route path="settings" element={<PlaceholderPage title="تنظیمات" />} />
         </Route>
-
-        {/* Teacher Routes */}
         <Route
           path="/teacher"
           element={
@@ -168,8 +130,6 @@ const App: React.FC = () => {
           <Route path="exams" element={<PlaceholderPage title="آزمون‌ها" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
-
-        {/* Consultant Routes */}
         <Route
           path="/consultant"
           element={
@@ -187,8 +147,6 @@ const App: React.FC = () => {
           <Route path="guidance" element={<PlaceholderPage title="هدایت تحصیلی" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
-
-        {/* Parent Routes */}
         <Route
           path="/parent"
           element={
@@ -205,8 +163,6 @@ const App: React.FC = () => {
           <Route path="homework" element={<PlaceholderPage title="تکالیف" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
-
-        {/* Student Routes */}
         <Route
           path="/student"
           element={
@@ -223,30 +179,13 @@ const App: React.FC = () => {
           <Route path="study-plan" element={<PlaceholderPage title="برنامه مطالعه" />} />
           <Route path="wellness" element={<PlaceholderPage title="سلامت روان" />} />
         </Route>
-
-        {/* Default Route */}
-        <Route
-          path="/"
-          element={
-            db.isInstalled() ? (
-              isAuthenticated && user ? (
-                <Navigate to={`/${user.role}`} replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            ) : (
-              <Navigate to="/install" replace />
-            )
-          }
-        />
-
-        {/* 404 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route
           path="*"
           element={
             <div className="min-h-screen bg-dark-950 flex items-center justify-center">
               <div className="text-center">
-                <h1 className="text-6xl font-bold text-dark-600 mb-4">404</h1>
+                <h1 className="text-6xl font-bold text-dark-600 mb-4">۴۰۴</h1>
                 <p className="text-dark-400 mb-6">صفحه مورد نظر یافت نشد</p>
                 <a
                   href="/"

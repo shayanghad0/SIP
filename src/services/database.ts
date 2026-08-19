@@ -1,5 +1,4 @@
 import type {
-  Database,
   Admin,
   Teacher,
   Student,
@@ -11,41 +10,19 @@ import type {
   RiskAnalysis,
   AttendanceRecord,
   Homework,
+  HomeworkSubmission,
   Exam,
   ExamScore,
   BehaviorReport,
   MentalHealthForm,
 } from '../types';
 
-// Initialize empty database structure
-const INITIAL_DATABASE: Database = {
-  admin: [],
-  teachers: [],
-  students: [],
-  parents: [],
-  consultants: [],
-  grades: [],
-  books: [],
-  notes: [],
-  aiAnalysis: [],
-  attendance: [],
-  homework: [],
-  homeworkSubmissions: [],
-  exams: [],
-  examScores: [],
-  behaviorReports: [],
-  mentalHealthForms: [],
-};
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-const DB_KEY = 'sip_database';
-const BACKUP_KEY = 'sip_database_backup';
-
-// Generate unique ID
 export const generateId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 };
 
-// Generate access code
 export const generateAccessCode = (): string => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -55,7 +32,6 @@ export const generateAccessCode = (): string => {
   return code;
 };
 
-// Simple hash function for passwords
 export const hashPassword = async (password: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(password + 'sip_salt_2024');
@@ -64,435 +40,261 @@ export const hashPassword = async (password: string): Promise<string> => {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
-// Verify password
 export const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
   const hashedInput = await hashPassword(password);
   return hashedInput === hash;
 };
 
+class ApiClient {
+  private async request<T>(method: string, endpoint: string, data?: any): Promise<T> {
+    const url = `${API_BASE}${endpoint}`;
+    const options: RequestInit = {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+    if (data) options.body = JSON.stringify(data);
+
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Request failed' }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+    return response.json();
+  }
+
+  get<T>(endpoint: string): Promise<T> { return this.request<T>('GET', endpoint); }
+  post<T>(endpoint: string, data?: any): Promise<T> { return this.request<T>('POST', endpoint, data); }
+  put<T>(endpoint: string, data?: any): Promise<T> { return this.request<T>('PUT', endpoint, data); }
+  delete<T>(endpoint: string): Promise<T> { return this.request<T>('DELETE', endpoint); }
+}
+
+const api = new ApiClient();
+
 class DatabaseService {
-  private db: Database;
-  private isLocked: boolean = false;
-
-  constructor() {
-    this.db = this.load();
-  }
-
-  // Load database from localStorage
-  private load(): Database {
+  // === Installation ===
+  async isInstalled(): Promise<boolean> {
     try {
-      const data = localStorage.getItem(DB_KEY);
-      if (data) {
-        return JSON.parse(data);
-      }
-      return { ...INITIAL_DATABASE };
-    } catch {
-      console.error('Failed to load database');
-      return { ...INITIAL_DATABASE };
-    }
+      const result = await api.get<{ installed: boolean }>('/install/status');
+      return result.installed;
+    } catch { return false; }
   }
 
-  // Save database to localStorage with backup
-  private save(): void {
-    if (this.isLocked) {
-      throw new Error('Database is locked');
-    }
+  async finishInstallation(data: {
+    admin: any;
+    grades: Grade[];
+    books: Book[];
+    consultants: any[];
+    students: any[];
+    parents: any[];
+    teachers: any[];
+  }): Promise<{ success: boolean }> {
+    return api.post<{ success: boolean }>('/install/finish', data);
+  }
 
+  // === Admin ===
+  async getAdmin(): Promise<Admin | undefined> {
+    try { return await api.get<Admin>('/admin'); } catch { return undefined; }
+  }
+  async createAdmin(admin: Omit<Admin, 'id' | 'createdAt' | 'updatedAt'>): Promise<Admin> {
+    return api.post<Admin>('/admin', admin);
+  }
+
+  // === Teachers ===
+  async getTeachers(): Promise<Teacher[]> { return api.get<Teacher[]>('/teachers'); }
+  async getTeacher(id: string): Promise<Teacher | undefined> {
+    try { return await api.get<Teacher>(`/teachers/${id}`); } catch { return undefined; }
+  }
+  async createTeacher(teacher: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>): Promise<Teacher> {
+    return api.post<Teacher>('/teachers', teacher);
+  }
+  async updateTeacher(id: string, updates: Partial<Teacher>): Promise<Teacher | undefined> {
+    try { return await api.put<Teacher>(`/teachers/${id}`, updates); } catch { return undefined; }
+  }
+  async deleteTeacher(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/teachers/${id}`); return r.success; } catch { return false; }
+  }
+
+  // === Students ===
+  async getStudents(): Promise<Student[]> { return api.get<Student[]>('/students'); }
+  async getStudent(id: string): Promise<Student | undefined> {
+    try { return await api.get<Student>(`/students/${id}`); } catch { return undefined; }
+  }
+  async createStudent(student: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Promise<Student> {
+    return api.post<Student>('/students', student);
+  }
+  async updateStudent(id: string, updates: Partial<Student>): Promise<Student | undefined> {
+    try { return await api.put<Student>(`/students/${id}`, updates); } catch { return undefined; }
+  }
+  async deleteStudent(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/students/${id}`); return r.success; } catch { return false; }
+  }
+  async getStudentsByClass(gradeId: string, classId: string): Promise<Student[]> {
+    const all = await this.getStudents();
+    return all.filter(s => s.gradeId === gradeId && s.classId === classId);
+  }
+
+  // === Parents ===
+  async getParents(): Promise<Parent[]> { return api.get<Parent[]>('/parents'); }
+  async getParent(id: string): Promise<Parent | undefined> {
+    try { return await api.get<Parent>(`/parents/${id}`); } catch { return undefined; }
+  }
+  async createParent(parent: Omit<Parent, 'id' | 'createdAt' | 'updatedAt'>): Promise<Parent> {
+    return api.post<Parent>('/parents', parent);
+  }
+  async deleteParent(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/parents/${id}`); return r.success; } catch { return false; }
+  }
+
+  // === Consultants ===
+  async getConsultants(): Promise<Consultant[]> { return api.get<Consultant[]>('/consultants'); }
+  async getConsultant(id: string): Promise<Consultant | undefined> {
+    try { return await api.get<Consultant>(`/consultants/${id}`); } catch { return undefined; }
+  }
+  async createConsultant(consultant: Omit<Consultant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Consultant> {
+    return api.post<Consultant>('/consultants', consultant);
+  }
+  async deleteConsultant(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/consultants/${id}`); return r.success; } catch { return false; }
+  }
+
+  // === Grades ===
+  async getGrades(): Promise<Grade[]> { return api.get<Grade[]>('/grades'); }
+  async getGrade(id: string): Promise<Grade | undefined> {
+    try { return await api.get<Grade>(`/grades/${id}`); } catch { return undefined; }
+  }
+  async createGrade(grade: Omit<Grade, 'id' | 'createdAt' | 'classes'>): Promise<Grade> {
+    return api.post<Grade>('/grades', grade);
+  }
+  async updateGrade(id: string, updates: Partial<Grade>): Promise<Grade | undefined> {
+    try { return await api.put<Grade>(`/grades/${id}`, updates); } catch { return undefined; }
+  }
+  async deleteGrade(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/grades/${id}`); return r.success; } catch { return false; }
+  }
+  async addClassToGrade(gradeId: string, className: string): Promise<Grade | undefined> {
+    try { return await api.post<Grade>(`/grades/${gradeId}/classes`, { className }); } catch { return undefined; }
+  }
+  async deleteClassFromGrade(gradeId: string, classId: string): Promise<boolean> {
     try {
-      this.isLocked = true;
-      
-      // Create backup before save
-      const currentData = localStorage.getItem(DB_KEY);
-      if (currentData) {
-        localStorage.setItem(BACKUP_KEY, currentData);
-      }
-
-      localStorage.setItem(DB_KEY, JSON.stringify(this.db));
-    } catch (error) {
-      // Restore from backup on error
-      const backup = localStorage.getItem(BACKUP_KEY);
-      if (backup) {
-        this.db = JSON.parse(backup);
-      }
-      throw error;
-    } finally {
-      this.isLocked = false;
-    }
+      const r = await api.delete<{ success: boolean }>(`/grades/${gradeId}/classes/${classId}`);
+      return r.success;
+    } catch { return false; }
   }
 
-  // Check if system is installed
-  isInstalled(): boolean {
-    return this.db.admin.length > 0;
+  // === Books ===
+  async getBooks(): Promise<Book[]> { return api.get<Book[]>('/books'); }
+  async getBook(id: string): Promise<Book | undefined> {
+    try { return await api.get<Book>(`/books/${id}`); } catch { return undefined; }
+  }
+  async createBook(book: Omit<Book, 'id' | 'createdAt'>): Promise<Book> {
+    return api.post<Book>('/books', book);
+  }
+  async deleteBook(id: string): Promise<boolean> {
+    try { const r = await api.delete<{ success: boolean }>(`/books/${id}`); return r.success; } catch { return false; }
   }
 
-  // Get all data
-  getAll<K extends keyof Database>(collection: K): Database[K] {
-    return [...this.db[collection]] as Database[K];
+  // === Attendance ===
+  async getAttendance(studentId?: string, date?: string): Promise<AttendanceRecord[]> {
+    const params = new URLSearchParams();
+    if (studentId) params.append('studentId', studentId);
+    if (date) params.append('date', date);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return api.get<AttendanceRecord[]>(`/attendance${query}`);
+  }
+  async createAttendance(record: Omit<AttendanceRecord, 'id'>): Promise<AttendanceRecord> {
+    return api.post<AttendanceRecord>('/attendance', record);
   }
 
-  // Get by ID
-  getById<K extends keyof Database>(
-    collection: K,
-    id: string
-  ): Database[K][number] | undefined {
-    return this.db[collection].find((item) => (item as { id: string }).id === id) as Database[K][number] | undefined;
+  // === Homework ===
+  async getHomework(classId?: string): Promise<Homework[]> {
+    const query = classId ? `?classId=${classId}` : '';
+    return api.get<Homework[]>(`/homework${query}`);
+  }
+  async createHomework(homework: Omit<Homework, 'id' | 'createdAt'>): Promise<Homework> {
+    return api.post<Homework>('/homework', homework);
   }
 
-  // Add item
-  add<K extends keyof Database>(collection: K, item: Database[K][number]): Database[K][number] {
-    (this.db[collection] as Database[K][number][]).push(item);
-    this.save();
-    return item;
+  // === Homework Submissions ===
+  async getHomeworkSubmissions(homeworkId?: string, studentId?: string): Promise<HomeworkSubmission[]> {
+    const params = new URLSearchParams();
+    if (homeworkId) params.append('homeworkId', homeworkId);
+    if (studentId) params.append('studentId', studentId);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return api.get<HomeworkSubmission[]>(`/homework-submissions${query}`);
+  }
+  async createHomeworkSubmission(submission: Omit<HomeworkSubmission, 'id'>): Promise<HomeworkSubmission> {
+    return api.post<HomeworkSubmission>('/homework-submissions', submission);
   }
 
-  // Update item
-  update<K extends keyof Database>(
-    collection: K,
-    id: string,
-    updates: Partial<Database[K][number]>
-  ): Database[K][number] | undefined {
-    const index = this.db[collection].findIndex((item) => (item as { id: string }).id === id);
-    if (index === -1) return undefined;
-
-    const item = this.db[collection][index];
-    const updatedItem = { ...item, ...updates, updatedAt: new Date().toISOString() };
-    (this.db[collection] as Database[K][number][])[index] = updatedItem;
-    this.save();
-    return updatedItem;
+  // === Exams ===
+  async getExams(classId?: string): Promise<Exam[]> {
+    const query = classId ? `?classId=${classId}` : '';
+    return api.get<Exam[]>(`/exams${query}`);
+  }
+  async createExam(exam: Omit<Exam, 'id' | 'createdAt'>): Promise<Exam> {
+    return api.post<Exam>('/exams', exam);
   }
 
-  // Delete item
-  delete<K extends keyof Database>(collection: K, id: string): boolean {
-    const index = this.db[collection].findIndex((item) => (item as { id: string }).id === id);
-    if (index === -1) return false;
-
-    (this.db[collection] as Database[K][number][]).splice(index, 1);
-    this.save();
-    return true;
+  // === Exam Scores ===
+  async getExamScores(examId?: string, studentId?: string): Promise<ExamScore[]> {
+    const params = new URLSearchParams();
+    if (examId) params.append('examId', examId);
+    if (studentId) params.append('studentId', studentId);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return api.get<ExamScore[]>(`/exam-scores${query}`);
+  }
+  async createExamScore(score: Omit<ExamScore, 'id'>): Promise<ExamScore> {
+    return api.post<ExamScore>('/exam-scores', score);
   }
 
-  // Query with filter
-  query<K extends keyof Database>(
-    collection: K,
-    predicate: (item: Database[K][number]) => boolean
-  ): Database[K][number][] {
-    return this.db[collection].filter(predicate) as Database[K][number][];
+  // === Behavior Reports ===
+  async getBehaviorReports(studentId?: string): Promise<BehaviorReport[]> {
+    const query = studentId ? `?studentId=${studentId}` : '';
+    return api.get<BehaviorReport[]>(`/behavior-reports${query}`);
+  }
+  async createBehaviorReport(report: Omit<BehaviorReport, 'id' | 'createdAt'>): Promise<BehaviorReport> {
+    return api.post<BehaviorReport>('/behavior-reports', report);
   }
 
-  // Bulk add
-  bulkAdd<K extends keyof Database>(collection: K, items: Database[K][number][]): void {
-    (this.db[collection] as Database[K][number][]).push(...items);
-    this.save();
+  // === Mental Health Forms ===
+  async getMentalHealthForms(studentId?: string): Promise<MentalHealthForm[]> {
+    const query = studentId ? `?studentId=${studentId}` : '';
+    return api.get<MentalHealthForm[]>(`/mental-health-forms${query}`);
+  }
+  async createMentalHealthForm(form: Omit<MentalHealthForm, 'id' | 'createdAt'>): Promise<MentalHealthForm> {
+    return api.post<MentalHealthForm>('/mental-health-forms', form);
   }
 
-  // Clear collection
-  clear<K extends keyof Database>(collection: K): void {
-    (this.db[collection] as Database[K][number][]) = [];
-    this.save();
+  // === Notes ===
+  async getNotes(targetId?: string): Promise<Note[]> {
+    const query = targetId ? `?targetId=${targetId}` : '';
+    return api.get<Note[]>(`/notes${query}`);
+  }
+  async createNote(note: Omit<Note, 'id' | 'createdAt'>): Promise<Note> {
+    return api.post<Note>('/notes', note);
   }
 
-  // Reset entire database
-  reset(): void {
-    this.db = { ...INITIAL_DATABASE };
-    this.save();
+  // === AI Analysis ===
+  async getAIAnalysis(studentId?: string): Promise<RiskAnalysis[]> {
+    const query = studentId ? `?studentId=${studentId}` : '';
+    return api.get<RiskAnalysis[]>(`/ai-analysis${query}`);
+  }
+  async createAIAnalysis(analysis: Omit<RiskAnalysis, 'id'>): Promise<RiskAnalysis> {
+    return api.post<RiskAnalysis>('/ai-analysis', analysis);
   }
 
-  // Specific methods for each collection
-  
-  // Admin
-  getAdmin(): Admin | undefined {
-    return this.db.admin[0];
-  }
-
-  createAdmin(admin: Omit<Admin, 'id' | 'createdAt' | 'updatedAt'>): Admin {
-    const newAdmin: Admin = {
-      ...admin,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.add('admin', newAdmin);
-    return newAdmin;
-  }
-
-  // Teachers
-  getTeachers(): Teacher[] {
-    return this.getAll('teachers');
-  }
-
-  createTeacher(teacher: Omit<Teacher, 'id' | 'createdAt' | 'updatedAt'>): Teacher {
-    const newTeacher: Teacher = {
-      ...teacher,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.add('teachers', newTeacher);
-    return newTeacher;
-  }
-
-  // Students
-  getStudents(): Student[] {
-    return this.getAll('students');
-  }
-
-  getStudentsByClass(gradeId: string, classId: string): Student[] {
-    return this.query('students', (s) => s.gradeId === gradeId && s.classId === classId);
-  }
-
-  createStudent(student: Omit<Student, 'id' | 'createdAt' | 'updatedAt'>): Student {
-    const newStudent: Student = {
-      ...student,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.add('students', newStudent);
-    return newStudent;
-  }
-
-  // Parents
-  getParents(): Parent[] {
-    return this.getAll('parents');
-  }
-
-  createParent(parent: Omit<Parent, 'id' | 'createdAt' | 'updatedAt'>): Parent {
-    const newParent: Parent = {
-      ...parent,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.add('parents', newParent);
-    return newParent;
-  }
-
-  // Consultants
-  getConsultants(): Consultant[] {
-    return this.getAll('consultants');
-  }
-
-  createConsultant(consultant: Omit<Consultant, 'id' | 'createdAt' | 'updatedAt'>): Consultant {
-    const newConsultant: Consultant = {
-      ...consultant,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    this.add('consultants', newConsultant);
-    return newConsultant;
-  }
-
-  // Grades
-  getGrades(): Grade[] {
-    return this.getAll('grades').sort((a, b) => a.order - b.order);
-  }
-
-  createGrade(grade: Omit<Grade, 'id' | 'createdAt' | 'classes'>): Grade {
-    const newGrade: Grade = {
-      ...grade,
-      id: generateId(),
-      classes: [],
-      createdAt: new Date().toISOString(),
-    };
-    this.add('grades', newGrade);
-    return newGrade;
-  }
-
-  addClassToGrade(gradeId: string, className: string): Grade | undefined {
-    const grade = this.getById('grades', gradeId) as Grade | undefined;
-    if (!grade) return undefined;
-
-    const newClass = {
-      id: generateId(),
-      name: className,
-      gradeId,
-      createdAt: new Date().toISOString(),
-    };
-
-    grade.classes.push(newClass);
-    this.update('grades', gradeId, { classes: grade.classes });
-    return grade;
-  }
-
-  // Books/Lessons
-  getBooks(): Book[] {
-    return this.getAll('books');
-  }
-
-  createBook(book: Omit<Book, 'id' | 'createdAt'>): Book {
-    const newBook: Book = {
-      ...book,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('books', newBook);
-    return newBook;
-  }
-
-  // Attendance
-  getAttendance(studentId?: string, date?: string): AttendanceRecord[] {
-    return this.query('attendance', (a) => {
-      if (studentId && a.studentId !== studentId) return false;
-      if (date && a.date !== date) return false;
-      return true;
-    });
-  }
-
-  createAttendance(record: Omit<AttendanceRecord, 'id'>): AttendanceRecord {
-    const newRecord: AttendanceRecord = {
-      ...record,
-      id: generateId(),
-    };
-    this.add('attendance', newRecord);
-    return newRecord;
-  }
-
-  // Homework
-  getHomework(classId?: string): Homework[] {
-    if (classId) {
-      return this.query('homework', (h) => h.classId === classId);
-    }
-    return this.getAll('homework');
-  }
-
-  createHomework(homework: Omit<Homework, 'id' | 'createdAt'>): Homework {
-    const newHomework: Homework = {
-      ...homework,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('homework', newHomework);
-    return newHomework;
-  }
-
-  // Exams
-  getExams(classId?: string): Exam[] {
-    if (classId) {
-      return this.query('exams', (e) => e.classId === classId);
-    }
-    return this.getAll('exams');
-  }
-
-  createExam(exam: Omit<Exam, 'id' | 'createdAt'>): Exam {
-    const newExam: Exam = {
-      ...exam,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('exams', newExam);
-    return newExam;
-  }
-
-  // Exam Scores
-  getExamScores(examId?: string, studentId?: string): ExamScore[] {
-    return this.query('examScores', (s) => {
-      if (examId && s.examId !== examId) return false;
-      if (studentId && s.studentId !== studentId) return false;
-      return true;
-    });
-  }
-
-  createExamScore(score: Omit<ExamScore, 'id'>): ExamScore {
-    const newScore: ExamScore = {
-      ...score,
-      id: generateId(),
-    };
-    this.add('examScores', newScore);
-    return newScore;
-  }
-
-  // Behavior Reports
-  getBehaviorReports(studentId?: string): BehaviorReport[] {
-    if (studentId) {
-      return this.query('behaviorReports', (b) => b.studentId === studentId);
-    }
-    return this.getAll('behaviorReports');
-  }
-
-  createBehaviorReport(report: Omit<BehaviorReport, 'id' | 'createdAt'>): BehaviorReport {
-    const newReport: BehaviorReport = {
-      ...report,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('behaviorReports', newReport);
-    return newReport;
-  }
-
-  // Mental Health Forms
-  getMentalHealthForms(studentId?: string): MentalHealthForm[] {
-    if (studentId) {
-      return this.query('mentalHealthForms', (f) => f.studentId === studentId);
-    }
-    return this.getAll('mentalHealthForms');
-  }
-
-  createMentalHealthForm(form: Omit<MentalHealthForm, 'id' | 'createdAt'>): MentalHealthForm {
-    const newForm: MentalHealthForm = {
-      ...form,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('mentalHealthForms', newForm);
-    return newForm;
-  }
-
-  // Notes
-  getNotes(targetId?: string): Note[] {
-    if (targetId) {
-      return this.query('notes', (n) => n.targetId === targetId);
-    }
-    return this.getAll('notes');
-  }
-
-  createNote(note: Omit<Note, 'id' | 'createdAt'>): Note {
-    const newNote: Note = {
-      ...note,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-    };
-    this.add('notes', newNote);
-    return newNote;
-  }
-
-  // AI Analysis
-  getAIAnalysis(studentId?: string): RiskAnalysis[] {
-    if (studentId) {
-      return this.query('aiAnalysis', (a) => a.studentId === studentId);
-    }
-    return this.getAll('aiAnalysis');
-  }
-
-  createAIAnalysis(analysis: Omit<RiskAnalysis, 'id'>): RiskAnalysis {
-    const newAnalysis: RiskAnalysis = {
-      ...analysis,
-      id: generateId(),
-    };
-    this.add('aiAnalysis', newAnalysis);
-    return newAnalysis;
-  }
-
-  // Authenticate user
+  // === Authentication ===
   async authenticate(username: string, password: string): Promise<{
     user: Admin | Teacher | Student | Parent | Consultant;
     role: string;
   } | null> {
-    const collections = ['admin', 'teachers', 'students', 'parents', 'consultants'] as const;
+    try {
+      return await api.post('/auth/login', { username, password });
+    } catch { return null; }
+  }
 
-    for (const collection of collections) {
-      const users = this.getAll(collection);
-      for (const user of users) {
-        if (
-          user.username === username &&
-          await verifyPassword(password, user.password)
-        ) {
-          return { user, role: user.role };
-        }
-      }
-    }
-
-    return null;
+  async reset(): Promise<{ success: boolean }> {
+    return api.post<{ success: boolean }>('/reset');
   }
 }
 
