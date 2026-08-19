@@ -188,8 +188,8 @@ export async function install(payload: InstallPayload): Promise<InstallResult> {
   const parentsFile: ParentsFile = { parents: [] };
   for (let idx = 0; idx < payload.students.length; idx += 1) {
     const s = payload.students[idx];
-    const parentUsername = `parent${String(idx + 1).padStart(2, "0")}`;
-    const parentPassword = generatePassword();
+    const parentUsername = `parent_${s.username.trim()}`;
+    const parentPassword = payload.admin.password;
     const stHash = await hashPassword(s.password);
     const parHash = await hashPassword(parentPassword);
     const st: Student = {

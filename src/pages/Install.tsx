@@ -494,7 +494,7 @@ function StepStudents({
     <div>
       <h3 className="mb-1 text-[15px] font-semibold text-slate-100">دانش‌آموزان</h3>
       <p className="mb-4 text-[12px] leading-6 text-slate-500">
-        برای هر دانش‌آموز به‌صورت خودکار حساب <b className="text-slate-300">والدین</b> با نام کاربری، رمز و کد دسترسی اختصاصی ساخته می‌شود.
+        برای هر دانش‌آموز به‌صورت خودکار حساب <b className="text-slate-300">والدین</b> با نام کاربری <b className="text-slate-300">parent_نام_کاربری_دانش‌آموز</b> و رمز عبور برابر با رمز مدیر ساخته می‌شود.
       </p>
       <form
         onSubmit={handleSubmit((v) => {
