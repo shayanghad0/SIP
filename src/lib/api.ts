@@ -541,9 +541,9 @@ export async function bootstrap(): Promise<{ installed: boolean; session: TokenP
   return { installed: isInstalled(), session: await verifyToken(readToken()) };
 }
 
-export async function login(username: string, password: string, accessCode: string) {
+export async function login(username: string, password: string) {
   await sleep(400);
-  const result = await attemptLogin(username, password, accessCode);
+  const result = await attemptLogin(username, password);
   if (result.ok && result.user) logActivity(result.user.role, roleLabel(result.user.role), `${result.user.name} وارد سامانه شد`);
   return result;
 }

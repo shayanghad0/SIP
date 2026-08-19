@@ -1,4 +1,4 @@
-import { AlertTriangle, BrainCircuit, ChevronDown, KeyRound, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
+import { AlertTriangle, BrainCircuit, ChevronDown, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import { Button, Field, Input, notify } from "../components/ui";
 interface LoginForm {
   username: string;
   password: string;
-  accessCode: string;
 }
 
 export default function Login() {
@@ -22,11 +21,11 @@ export default function Login() {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<LoginForm>({ defaultValues: { username: "", password: "", accessCode: "" } });
+  } = useForm<LoginForm>({ defaultValues: { username: "", password: "" } });
 
   const onSubmit = handleSubmit(async (v) => {
     setBusy(true);
-    const res = await login(v.username, v.password, v.accessCode);
+    const res = await login(v.username, v.password);
     setBusy(false);
     if (!res.ok) {
       notify.error(res.error ?? "ورود ناموفق بود");
@@ -65,12 +64,6 @@ export default function Login() {
                 <div className="relative">
                   <Lock size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <Input dir="ltr" type="password" className="pr-10" placeholder="••••••••" {...register("password", { required: true })} />
-                </div>
-              </Field>
-              <Field label="کد دسترسی" error={errors.accessCode ? "الزامی" : undefined} hint="کدی که هنگام نصب دریافت کرده‌اید (مثلاً SIP-S-XXXX-XXXX)">
-                <div className="relative">
-                  <KeyRound size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <Input dir="ltr" className="pr-10 uppercase" placeholder="SIP-XX-XXXX-XXXX" {...register("accessCode", { required: true })} />
                 </div>
               </Field>
               <Button type="submit" loading={busy} className="w-full py-3">

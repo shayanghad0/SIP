@@ -206,13 +206,9 @@ export interface LoginResult {
 export async function attemptLogin(
   username: string,
   password: string,
-  accessCode: string,
 ): Promise<LoginResult> {
   const found = findUserByUsername(username);
   if (!found) return { ok: false, error: "کاربری با این نام کاربری یافت نشد" };
-  if (found.accessCode !== accessCode.trim().toUpperCase()) {
-    return { ok: false, error: "کد دسترسی نادرست است" };
-  }
   const ok = await verifyPasswordForUser(found, password);
   if (!ok) return { ok: false, error: "رمز عبور نادرست است" };
   const token = await signToken({ sub: found.id, role: found.role, name: found.name });
