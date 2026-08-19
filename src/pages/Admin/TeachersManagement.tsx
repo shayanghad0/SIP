@@ -244,16 +244,20 @@ export const TeachersManagement: React.FC = () => {
                   placeholder="درس"
                   className="flex-1"
                 />
-                <Select
-                  value={assignment.gradeId}
-                  onChange={(e) => {
-                    updateAssignment(index, 'gradeId', e.target.value);
-                    updateAssignment(index, 'classId', '');
-                  }}
-                  options={grades.map(g => ({ value: g.id, label: g.name }))}
-                  placeholder="پایه"
-                  className="flex-1"
-                />
+                 <Select
+                   value={assignment.gradeId}
+                   onChange={(e) => {
+                     setAssignments(assignments.map((a, i) => {
+                       if (i === index) {
+                         return { ...a, gradeId: e.target.value, classId: '' };
+                       }
+                       return a;
+                     }));
+                   }}
+                   options={grades.map(g => ({ value: g.id, label: g.name }))}
+                   placeholder="پایه"
+                   className="flex-1"
+                 />
                 <Select
                   value={assignment.classId}
                   onChange={(e) => updateAssignment(index, 'classId', e.target.value)}
