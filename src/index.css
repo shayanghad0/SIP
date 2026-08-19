@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+  --color-primary: #2563eb;
+  --color-primary-soft: #3b82f6;
+  --color-ink-950: #070b14;
+  --color-ink-900: #0a101f;
+  --color-ink-850: #0d1526;
+  --color-ink-800: #101a30;
+  --color-ink-700: #16233f;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  font-family: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #070b14;
+  background-image:
+    radial-gradient(1100px 500px at 85% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
+    radial-gradient(900px 420px at 0% 0%, rgba(14, 165, 233, 0.07), transparent 55%);
+  background-attachment: fixed;
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1e293b transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+select option {
+  background-color: #0d1526;
+  color: #e2e8f0;
+}
+
+@keyframes sip-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sip-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sip-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sip-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes sip-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.anim-fade-up {
+  animation: sip-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-fade-in {
+  animation: sip-fade-in 0.35s ease both;
+}
+.anim-scale-in {
+  animation: sip-scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-delay-1 {
+  animation-delay: 0.06s;
+}
+.anim-delay-2 {
+  animation-delay: 0.12s;
+}
+.anim-delay-3 {
+  animation-delay: 0.18s;
+}
+.anim-delay-4 {
+  animation-delay: 0.24s;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.08) 25%, rgba(148, 163, 184, 0.16) 50%, rgba(148, 163, 184, 0.08) 75%);
+  background-size: 200% 100%;
+  animation: sip-shimmer 1.4s infinite linear;
+  border-radius: 0.75rem;
+}
+
+.pulse-dot {
+  animation: sip-pulse-dot 1.6s ease-in-out infinite;
+}
+
+.card-surface {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 1.1rem;
+}
+
+.chart-ltr {
+  direction: ltr;
+}
+
+input[type="range"] {
+  accent-color: #2563eb;
+}
