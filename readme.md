@@ -463,6 +463,18 @@ The project intentionally does **not** use:
 
 ---
 
+# How to Install 
+
+only need node.js and run this commands
+```bash
+git clone https://github.com/shayanghad0/sip.git
+cd sip
+npm i 
+npm run dev
+```
+
+---
+
 # 🎯 Vision
 
 School Intelligence Platform is designed to become more than a traditional school management system.
