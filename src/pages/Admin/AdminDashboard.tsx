@@ -1,5 +1,4 @@
-// src/pages/Admin/AdminDashboard.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Users,
   GraduationCap,
@@ -26,58 +25,27 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { Card, CardHeader, Badge, LoadingScreen } from '../../components/ui';
+import { Card, CardHeader, Badge } from '../../components/ui';
 import db from '../../services/database';
 import { getSchoolAnalytics, calculateRiskScore } from '../../services/aiEngine';
 
-// Colors for charts
-const COLORS = ['#3b82f6', '#ef4444'];
+// Colors for charts - used in components below
 
 export const AdminDashboard: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [students, setStudents] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [consultants, setConsultants] = useState<any[]>([]);
-  const [grades, setGrades] = useState<any[]>([]);
-
-  // Load data
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [studentsData, teachersData, consultantsData, gradesData] = await Promise.all([
-          db.getStudents(),
-          db.getTeachers(),
-          db.getConsultants(),
-          db.getGrades(),
-        ]);
-        setStudents(studentsData);
-        setTeachers(teachersData);
-        setConsultants(consultantsData);
-        setGrades(gradesData);
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  // Compute analytics and risk scores AFTER data is loaded
-  const analytics = useMemo(() => {
-    if (students.length === 0) return null;
-    return getSchoolAnalytics();
-  }, [students]);
+  const analytics = useMemo(() => getSchoolAnalytics(), []);
+  const students = useMemo(() => db.getStudents(), []);
+  const teachers = useMemo(() => db.getTeachers(), []);
+  const consultants = useMemo(() => db.getConsultants(), []);
+  const grades = useMemo(() => db.getGrades(), []);
 
   const riskStudents = useMemo(() => {
-    if (students.length === 0) return [];
     return students
-      .map((student: any) => ({
+      .map(student => ({
         student,
         analysis: calculateRiskScore(student.id),
       }))
-      .filter((item: any) => item.analysis.riskScore > 60)
-      .sort((a: any, b: any) => b.analysis.riskScore - a.analysis.riskScore)
+      .filter(item => item.analysis.riskScore > 60)
+      .sort((a, b) => b.analysis.riskScore - a.analysis.riskScore)
       .slice(0, 5);
   }, [students]);
 
@@ -109,15 +77,15 @@ export const AdminDashboard: React.FC = () => {
     },
     {
       title: 'دانش‌آموزان در خطر',
-      value: analytics?.highRiskStudents ?? 0,
+      value: analytics.highRiskStudents,
       icon: AlertTriangle,
       color: 'red',
-      change: analytics?.highRiskStudents ?? 0 > 0 ? 'نیاز به توجه' : 'عالی',
-      trend: (analytics?.highRiskStudents ?? 0) > 0 ? 'down' : 'up',
+      change: analytics.highRiskStudents > 0 ? 'نیاز به توجه' : 'عالی',
+      trend: analytics.highRiskStudents > 0 ? 'down' : 'up',
     },
   ];
 
-  // Mock data for charts (can be made dynamic later)
+  // Mock data for charts
   const attendanceData = [
     { name: 'فروردین', present: 92, absent: 8 },
     { name: 'اردیبهشت', present: 88, absent: 12 },
@@ -127,21 +95,17 @@ export const AdminDashboard: React.FC = () => {
     { name: 'شهریور', present: 93, absent: 7 },
   ];
 
-  const gradeDistribution = analytics?.gradeAnalytics?.map((g: any) => ({
+  const gradeDistribution = analytics.gradeAnalytics.map(g => ({
     name: g.gradeName,
     students: g.studentCount,
     average: Math.round(g.averageScore),
     risk: g.riskCount,
-  })) ?? [];
+  }));
 
   const riskDistribution = [
-    { name: 'کم خطر', value: students.length - (analytics?.highRiskStudents ?? 0) },
-    { name: 'پرخطر', value: analytics?.highRiskStudents ?? 0 },
+    { name: 'کم خطر', value: students.length - analytics.highRiskStudents },
+    { name: 'پرخطر', value: analytics.highRiskStudents },
   ];
-
-  if (loading) {
-    return <LoadingScreen message="در حال بارگذاری داشبورد..." />;
-  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -284,9 +248,9 @@ export const AdminDashboard: React.FC = () => {
           />
           {riskStudents.length > 0 ? (
             <div className="space-y-3">
-              {riskStudents.map(({ student, analysis }: any) => {
-                const grade = grades.find((g: any) => g.id === student.gradeId);
-                const cls = grade?.classes.find((c: any) => c.id === student.classId);
+              {riskStudents.map(({ student, analysis }) => {
+                const grade = grades.find(g => g.id === student.gradeId);
+                const cls = grade?.classes.find(c => c.id === student.classId);
                 return (
                   <div
                     key={student.id}
@@ -349,7 +313,10 @@ export const AdminDashboard: React.FC = () => {
                   dataKey="value"
                 >
                   {riskDistribution.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={index === 0 ? '#22c55e' : '#ef4444'}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
@@ -380,13 +347,13 @@ export const AdminDashboard: React.FC = () => {
         <Card padding="sm" className="text-center">
           <p className="text-dark-500 text-sm">میانگین حضور</p>
           <p className="text-2xl font-bold text-green-400 mt-1">
-            {analytics?.averageAttendance?.toFixed(0) ?? 0}%
+            {analytics.averageAttendance.toFixed(0)}%
           </p>
         </Card>
         <Card padding="sm" className="text-center">
           <p className="text-dark-500 text-sm">میانگین ریسک</p>
           <p className="text-2xl font-bold text-yellow-400 mt-1">
-            {analytics?.averageRiskScore?.toFixed(0) ?? 0}
+            {analytics.averageRiskScore.toFixed(0)}
           </p>
         </Card>
         <Card padding="sm" className="text-center">
@@ -396,7 +363,7 @@ export const AdminDashboard: React.FC = () => {
         <Card padding="sm" className="text-center">
           <p className="text-dark-500 text-sm">تعداد کلاس‌ها</p>
           <p className="text-2xl font-bold text-primary-400 mt-1">
-            {grades.reduce((sum: number, g: any) => sum + g.classes.length, 0)}
+            {grades.reduce((sum, g) => sum + g.classes.length, 0)}
           </p>
         </Card>
       </div>

@@ -1,13 +1,13 @@
-// src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-import { LoadingScreen, Button } from './components/ui';
+import { LoadingScreen } from './components/ui';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { useAuthStore, isTokenValid } from './store/authStore';
 import db from './services/database';
 
+// Pages
 import { InstallWizard } from './pages/Install/InstallWizard';
 import { LoginPage } from './pages/Login/LoginPage';
 import { AdminDashboard } from './pages/Admin/AdminDashboard';
@@ -19,6 +19,7 @@ import { ConsultantDashboard } from './pages/Consultant/ConsultantDashboard';
 import { ParentDashboard } from './pages/Parent/ParentDashboard';
 import { StudentDashboard } from './pages/Student/StudentDashboard';
 
+// Placeholder pages
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   <div className="flex items-center justify-center min-h-[60vh]">
     <div className="text-center">
@@ -28,75 +29,34 @@ const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
   </div>
 );
 
+// Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, token } = useAuthStore();
+
   if (!isAuthenticated || !token || !isTokenValid(token)) {
     return <Navigate to="/login" replace />;
   }
+
   return <>{children}</>;
 };
 
-// ===== InstallGuard with FULL error handling =====
+// Install Guard
 const InstallGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<{
-    loading: boolean;
-    installed: boolean | null;
-    error: string | null;
-  }>({
-    loading: true,
-    installed: null,
-    error: null,
-  });
+  const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const check = async () => {
-      try {
-        const installed = await db.isInstalled();
-        setState({ loading: false, installed, error: null });
-      } catch (err: any) {
-        setState({
-          loading: false,
-          installed: false,
-          error: err.message || 'خطا در اتصال به سرور',
-        });
-      }
+    const checkInstallation = () => {
+      const installed = db.isInstalled();
+      setIsInstalled(installed);
     };
-    check();
+    checkInstallation();
   }, []);
 
-  if (state.loading) {
+  if (isInstalled === null) {
     return <LoadingScreen message="در حال بارگذاری..." />;
   }
 
-  if (state.error) {
-    return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto bg-red-500/20 rounded-2xl flex items-center justify-center mb-4">
-            <span className="text-3xl">⚠️</span>
-          </div>
-          <h2 className="text-2xl font-bold text-red-400 mb-4">خطا در اتصال</h2>
-          <p className="text-dark-400 mb-6">{state.error}</p>
-          <p className="text-dark-500 text-sm mb-6">
-            لطفاً مطمئن شوید که سرور در حال اجراست (پورت ۳۰۰۱) و سپس دوباره تلاش کنید.
-          </p>
-          <Button onClick={() => window.location.reload()}>تلاش مجدد</Button>
-          <button
-            className="block w-full mt-3 text-dark-500 text-sm hover:text-dark-300 transition-colors"
-            onClick={() => {
-              // Force to installation page if user wants to reinstall
-              db.resetInstallationCache();
-              window.location.href = '/install';
-            }}
-          >
-            ↻ بازنشانی و نصب مجدد
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!state.installed) {
+  if (!isInstalled) {
     return <Navigate to="/install" replace />;
   }
 
@@ -108,13 +68,16 @@ const App: React.FC = () => {
   const { user, isAuthenticated, token, logout } = useAuthStore();
 
   useEffect(() => {
+    // Check token validity on app load
     if (isAuthenticated && token && !isTokenValid(token)) {
       logout();
     }
     setIsLoading(false);
   }, [isAuthenticated, token, logout]);
 
-  if (isLoading) return <LoadingScreen message="در حال بارگذاری..." />;
+  if (isLoading) {
+    return <LoadingScreen message="در حال بارگذاری..." />;
+  }
 
   return (
     <BrowserRouter>
@@ -128,12 +91,31 @@ const App: React.FC = () => {
             border: '1px solid #334155',
             borderRadius: '12px',
           },
-          success: { iconTheme: { primary: '#22c55e', secondary: '#1e293b' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#1e293b' } },
+          success: {
+            iconTheme: {
+              primary: '#22c55e',
+              secondary: '#1e293b',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#1e293b',
+            },
+          },
         }}
       />
+
       <Routes>
-        <Route path="/install" element={<InstallWizard />} />
+        {/* Installation Route */}
+        <Route
+          path="/install"
+          element={
+            db.isInstalled() ? <Navigate to="/login" replace /> : <InstallWizard />
+          }
+        />
+
+        {/* Login Route */}
         <Route
           path="/login"
           element={
@@ -146,6 +128,8 @@ const App: React.FC = () => {
             </InstallGuard>
           }
         />
+
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -165,6 +149,8 @@ const App: React.FC = () => {
           <Route path="ai-reports" element={<PlaceholderPage title="گزارشات هوشمند" />} />
           <Route path="settings" element={<PlaceholderPage title="تنظیمات" />} />
         </Route>
+
+        {/* Teacher Routes */}
         <Route
           path="/teacher"
           element={
@@ -182,6 +168,8 @@ const App: React.FC = () => {
           <Route path="exams" element={<PlaceholderPage title="آزمون‌ها" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
+
+        {/* Consultant Routes */}
         <Route
           path="/consultant"
           element={
@@ -199,6 +187,8 @@ const App: React.FC = () => {
           <Route path="guidance" element={<PlaceholderPage title="هدایت تحصیلی" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
+
+        {/* Parent Routes */}
         <Route
           path="/parent"
           element={
@@ -215,6 +205,8 @@ const App: React.FC = () => {
           <Route path="homework" element={<PlaceholderPage title="تکالیف" />} />
           <Route path="reports" element={<PlaceholderPage title="گزارشات" />} />
         </Route>
+
+        {/* Student Routes */}
         <Route
           path="/student"
           element={
@@ -231,13 +223,30 @@ const App: React.FC = () => {
           <Route path="study-plan" element={<PlaceholderPage title="برنامه مطالعه" />} />
           <Route path="wellness" element={<PlaceholderPage title="سلامت روان" />} />
         </Route>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Default Route */}
+        <Route
+          path="/"
+          element={
+            db.isInstalled() ? (
+              isAuthenticated && user ? (
+                <Navigate to={`/${user.role}`} replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            ) : (
+              <Navigate to="/install" replace />
+            )
+          }
+        />
+
+        {/* 404 */}
         <Route
           path="*"
           element={
             <div className="min-h-screen bg-dark-950 flex items-center justify-center">
               <div className="text-center">
-                <h1 className="text-6xl font-bold text-dark-600 mb-4">۴۰۴</h1>
+                <h1 className="text-6xl font-bold text-dark-600 mb-4">404</h1>
                 <p className="text-dark-400 mb-6">صفحه مورد نظر یافت نشد</p>
                 <a
                   href="/"

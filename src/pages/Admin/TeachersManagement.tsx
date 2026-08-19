@@ -1,343 +1,333 @@
-// src/pages/Admin/TeachersManagement.tsx
-import React, { useState, useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import React, { useMemo } from 'react';
 import {
   GraduationCap,
-  Plus,
-  Search,
-  Eye,
-  Trash2,
+  Users,
+  ClipboardList,
   BookOpen,
+  AlertTriangle,
+  TrendingUp,
+  Calendar,
+  CheckCircle,
+  Clock,
 } from 'lucide-react';
-import { Card, Button, Input, Select, Badge, Modal, LoadingScreen } from '../../components/ui';
-import db, { generateId } from '../../services/database';
-import { analyzeTeacherPerformance } from '../../services/aiEngine';
-import type { Teacher, TeacherAssignment } from '../../types';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
+import { Card, CardHeader, Badge } from '../../components/ui';
+import { useAuthStore } from '../../store/authStore';
+import db from '../../services/database';
+import { calculateRiskScore, analyzeTeacherPerformance } from '../../services/aiEngine';
+import type { Teacher } from '../../types';
 
-interface TeacherFormData {
-  fullName: string;
-  username: string;
-  password: string;
-}
+export const TeacherDashboard: React.FC = () => {
+  const { user } = useAuthStore();
+  const teacher = user as Teacher;
 
-export const TeachersManagement: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [grades, setGrades] = useState<any[]>([]);
-  const [books, setBooks] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [assignments, setAssignments] = useState<TeacherAssignment[]>([]);
+  const grades = useMemo(() => db.getGrades(), []);
+  const books = useMemo(() => db.getBooks(), []);
+  const allStudents = useMemo(() => db.getStudents(), []);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<TeacherFormData>();
-
-  // Load data
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [teachersData, gradesData, booksData] = await Promise.all([
-          db.getTeachers(),
-          db.getGrades(),
-          db.getBooks(),
-        ]);
-        setTeachers(teachersData || []);
-        setGrades(gradesData || []);
-        setBooks(booksData || []);
-        setError(null);
-      } catch (err: any) {
-        console.error('Failed to load teachers:', err);
-        setError('خطا در بارگیری اطلاعات. لطفاً مطمئن شوید سرور در حال اجراست.');
-        toast.error('خطا در بارگیری اطلاعات');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  const filteredTeachers = useMemo(() => {
-    return teachers.filter(teacher =>
-      teacher.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [teachers, searchTerm]);
-
-  const teachersWithAnalysis = useMemo(() => {
-    if (teachers.length === 0) return [];
-    return filteredTeachers.map(teacher => {
-      let analysis;
-      try {
-        analysis = analyzeTeacherPerformance(teacher.id);
-      } catch (e) {
-        analysis = { averageClassScore: 0, improvementRate: 0, homeworkCompletionRate: 0, examDifficulty: 50, effectiveness: 0 };
-      }
-      return { teacher, analysis };
+  // Get students from teacher's assigned classes
+  const myStudents = useMemo(() => {
+    const studentSet = new Set<string>();
+    teacher.assignments.forEach(assignment => {
+      const classStudents = allStudents.filter(
+        s => s.gradeId === assignment.gradeId && s.classId === assignment.classId
+      );
+      classStudents.forEach(s => studentSet.add(s.id));
     });
-  }, [filteredTeachers]);
+    return allStudents.filter(s => studentSet.has(s.id));
+  }, [teacher.assignments, allStudents]);
 
-  const addAssignment = () => {
-    setAssignments([...assignments, { lessonId: '', gradeId: '', classId: '' }]);
-  };
+  // Get students with risk analysis
+  const studentsWithRisk = useMemo(() => {
+    return myStudents
+      .map(student => ({
+        student,
+        analysis: calculateRiskScore(student.id),
+      }))
+      .filter(item => item.analysis.riskScore > 60)
+      .sort((a, b) => b.analysis.riskScore - a.analysis.riskScore)
+      .slice(0, 5);
+  }, [myStudents]);
 
-  const updateAssignment = (index: number, field: keyof TeacherAssignment, value: string) => {
-    setAssignments(assignments.map((a, i) => {
-      if (i === index) return { ...a, [field]: value };
-      return a;
-    }));
-  };
+  // Teacher performance analysis
+  const performance = useMemo(() => analyzeTeacherPerformance(teacher.id), [teacher.id]);
 
-  const removeAssignment = (index: number) => {
-    setAssignments(assignments.filter((_, i) => i !== index));
-  };
+  // Get unique classes count
+  const uniqueClasses = useMemo(() => {
+    const classSet = new Set<string>();
+    teacher.assignments.forEach(a => classSet.add(`${a.gradeId}-${a.classId}`));
+    return classSet.size;
+  }, [teacher.assignments]);
 
-  const getAvailableClasses = (gradeId: string) => {
-    const grade = grades.find(g => g.id === gradeId);
-    return grade?.classes || [];
-  };
+  // Mock performance data
+  const performanceData = [
+    { month: 'مهر', average: 72 },
+    { month: 'آبان', average: 75 },
+    { month: 'آذر', average: 78 },
+    { month: 'دی', average: 74 },
+    { month: 'بهمن', average: 80 },
+    { month: 'اسفند', average: 82 },
+  ];
 
-  const onSubmit = async (data: TeacherFormData) => {
-    try {
-      const validAssignments = assignments.filter(a => a.lessonId && a.gradeId && a.classId);
-      const newTeacher: Teacher = {
-        id: generateId(),
-        fullName: data.fullName,
-        username: data.username,
-        password: data.password, // server will hash
-        role: 'teacher',
-        assignments: validAssignments,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+  // Assignment stats by lesson
+  const lessonStats = useMemo(() => {
+    const stats: Record<string, { name: string; students: number; classes: number }> = {};
+    teacher.assignments.forEach(assignment => {
+      const book = books.find(b => b.id === assignment.lessonId);
+      if (!book) return;
+      
+      if (!stats[assignment.lessonId]) {
+        stats[assignment.lessonId] = { name: book.name, students: 0, classes: 0 };
+      }
+      
+      const classStudents = allStudents.filter(
+        s => s.gradeId === assignment.gradeId && s.classId === assignment.classId
+      );
+      stats[assignment.lessonId].students += classStudents.length;
+      stats[assignment.lessonId].classes += 1;
+    });
+    return Object.values(stats);
+  }, [teacher.assignments, books, allStudents]);
 
-      await db.createTeacher(newTeacher);
-      const updated = await db.getTeachers();
-      setTeachers(updated);
-      setIsModalOpen(false);
-      reset();
-      setAssignments([]);
-      toast.success(`دبیر ${data.fullName} اضافه شد`);
-    } catch (err) {
-      console.error('Add teacher error:', err);
-      toast.error('خطا در افزودن دبیر');
-    }
-  };
-
-  const handleDelete = async (teacher: Teacher) => {
-    if (!window.confirm(`آیا از حذف ${teacher.fullName} اطمینان دارید؟`)) return;
-    try {
-      await db.deleteTeacher(teacher.id);
-      const updated = await db.getTeachers();
-      setTeachers(updated);
-      toast.success('دبیر حذف شد');
-    } catch (err) {
-      console.error('Delete error:', err);
-      toast.error('خطا در حذف');
-    }
-  };
-
-  const viewTeacherDetails = (teacher: Teacher) => {
-    setSelectedTeacher(teacher);
-    setIsDetailModalOpen(true);
-  };
-
-  const selectedTeacherAnalysis = selectedTeacher ? analyzeTeacherPerformance(selectedTeacher.id) : null;
-
-  if (loading) return <LoadingScreen message="در حال بارگذاری دبیران..." />;
-  if (error) return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="text-center max-w-md">
-        <div className="text-red-400 text-4xl mb-4">⚠️</div>
-        <p className="text-dark-200">{error}</p>
-        <Button className="mt-4" onClick={() => window.location.reload()}>تلاش مجدد</Button>
-      </div>
-    </div>
-  );
+  const stats = [
+    { label: 'دانش‌آموزان من', value: myStudents.length, icon: Users, color: 'primary' },
+    { label: 'کلاس‌های تدریس', value: uniqueClasses, icon: GraduationCap, color: 'green' },
+    { label: 'دروس تدریس', value: lessonStats.length, icon: BookOpen, color: 'yellow' },
+    { label: 'دانش‌آموزان در خطر', value: studentsWithRisk.length, icon: AlertTriangle, color: 'red' },
+  ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-dark-100">مدیریت دبیران</h1>
-          <p className="text-dark-400 mt-1">{teachers.length} دبیر ثبت شده</p>
+          <h1 className="text-3xl font-bold text-dark-100">خوش آمدید، {teacher.fullName}</h1>
+          <p className="text-dark-400 mt-1">پنل دبیر</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} icon={<Plus className="w-4 h-4" />}>
-          افزودن دبیر
-        </Button>
+        <div className="flex items-center gap-2 px-4 py-2 bg-dark-800 rounded-xl">
+          <Calendar className="w-4 h-4 text-dark-400" />
+          <span className="text-dark-300 text-sm">
+            {new Date().toLocaleDateString('fa-IR')}
+          </span>
+        </div>
       </div>
 
-      <Card padding="sm">
-        <Input
-          placeholder="جستجو بر اساس نام یا نام کاربری..."
-          icon={<Search className="w-4 h-4" />}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {teachersWithAnalysis.map(({ teacher, analysis }) => (
-          <Card key={teacher.id} hover>
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-primary-600/20 rounded-xl flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-dark-100">{teacher.fullName}</h3>
-                  <p className="text-sm text-dark-500">@{teacher.username}</p>
-                </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <Card key={index} hover>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-dark-400 text-sm">{stat.label}</p>
+                <p className="text-3xl font-bold text-dark-100 mt-1">{stat.value}</p>
               </div>
-              <Badge variant="info">{teacher.assignments.length} کلاس</Badge>
-            </div>
-            <div className="space-y-3 mb-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dark-400">میانگین نمرات</span>
-                <span className="text-dark-200">{analysis.averageClassScore.toFixed(1)}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dark-400">اثربخشی</span>
-                <span className="text-dark-200">{analysis.effectiveness.toFixed(0)}%</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dark-400">تکمیل تکالیف</span>
-                <span className="text-dark-200">{analysis.homeworkCompletionRate.toFixed(0)}%</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-end pt-4 border-t border-dark-700">
-              <div className="flex items-center gap-2">
-                <button onClick={() => viewTeacherDetails(teacher)} className="p-2 hover:bg-dark-700 rounded-lg text-dark-400 hover:text-primary-400 transition-colors">
-                  <Eye className="w-4 h-4" />
-                </button>
-                <button onClick={() => handleDelete(teacher)} className="p-2 hover:bg-dark-700 rounded-lg text-dark-400 hover:text-red-400 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              <div className={`p-3 rounded-xl ${
+                stat.color === 'primary' ? 'bg-primary-600/20' :
+                stat.color === 'green' ? 'bg-green-500/20' :
+                stat.color === 'yellow' ? 'bg-yellow-500/20' :
+                'bg-red-500/20'
+              }`}>
+                <stat.icon className={`w-6 h-6 ${
+                  stat.color === 'primary' ? 'text-primary-400' :
+                  stat.color === 'green' ? 'text-green-400' :
+                  stat.color === 'yellow' ? 'text-yellow-400' :
+                  'text-red-400'
+                }`} />
               </div>
             </div>
           </Card>
         ))}
       </div>
 
-      {filteredTeachers.length === 0 && (
-        <Card className="text-center py-12">
-          <GraduationCap className="w-12 h-12 text-dark-600 mx-auto mb-4" />
-          <p className="text-dark-400">دبیری یافت نشد</p>
-        </Card>
-      )}
-
-      {/* Add Teacher Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="افزودن دبیر جدید" size="lg">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <Input label="نام و نام خانوادگی" error={errors.fullName?.message} {...register('fullName', { required: 'نام الزامی است' })} />
-            <Input label="نام کاربری" error={errors.username?.message} {...register('username', { required: 'نام کاربری الزامی است' })} />
-            <Input label="رمز عبور" type="password" error={errors.password?.message} {...register('password', { required: 'رمز عبور الزامی است', minLength: { value: 6, message: 'حداقل ۶ کاراکتر' } })} />
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-dark-200 text-sm">تخصیص کلاس‌ها</span>
-              <Button type="button" variant="ghost" size="sm" onClick={addAssignment} icon={<Plus className="w-4 h-4" />}>افزودن</Button>
-            </div>
-            {assignments.map((assignment, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <Select
-                  value={assignment.lessonId}
-                  onChange={(e) => updateAssignment(index, 'lessonId', e.target.value)}
-                  options={books.map(b => ({ value: b.id, label: b.name }))}
-                  placeholder="درس"
-                  className="flex-1"
-                />
-                <Select
-                  value={assignment.gradeId}
-                  onChange={(e) => {
-                    setAssignments(assignments.map((a, i) => {
-                      if (i === index) return { ...a, gradeId: e.target.value, classId: '' };
-                      return a;
-                    }));
+      {/* Performance & Classes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Performance Chart */}
+        <Card>
+          <CardHeader
+            title="میانگین نمرات کلاس‌ها"
+            subtitle="روند ۶ ماه اخیر"
+            icon={<TrendingUp className="w-5 h-5" />}
+          />
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={performanceData}>
+                <defs>
+                  <linearGradient id="colorAvg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#64748b" fontSize={12} domain={[0, 100]} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
                   }}
-                  options={grades.map(g => ({ value: g.id, label: g.name }))}
-                  placeholder="پایه"
-                  className="flex-1"
                 />
-                <Select
-                  value={assignment.classId}
-                  onChange={(e) => updateAssignment(index, 'classId', e.target.value)}
-                  options={getAvailableClasses(assignment.gradeId).map(c => ({ value: c.id, label: c.name }))}
-                  placeholder="کلاس"
-                  className="flex-1"
-                  disabled={!assignment.gradeId}
+                <Area
+                  type="monotone"
+                  dataKey="average"
+                  stroke="#22c55e"
+                  fillOpacity={1}
+                  fill="url(#colorAvg)"
+                  name="میانگین"
                 />
-                <button type="button" onClick={() => removeAssignment(index)} className="p-2 text-dark-400 hover:text-red-400">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
+        </Card>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>انصراف</Button>
-            <Button type="submit">افزودن دبیر</Button>
+        {/* Lesson Stats */}
+        <Card>
+          <CardHeader
+            title="آمار دروس"
+            subtitle="تعداد دانش‌آموزان"
+            icon={<BookOpen className="w-5 h-5" />}
+          />
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={lessonStats} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis type="number" stroke="#64748b" fontSize={12} />
+                <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} width={80} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1e293b',
+                    border: '1px solid #334155',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Bar dataKey="students" fill="#3b82f6" radius={[0, 4, 4, 0]} name="دانش‌آموز" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </form>
-      </Modal>
+        </Card>
+      </div>
 
-      {/* Detail Modal */}
-      <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title={selectedTeacher?.fullName || ''} size="lg">
-        {selectedTeacher && selectedTeacherAnalysis && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-dark-800 rounded-xl text-center">
-                <p className="text-dark-500 text-sm mb-1">میانگین نمرات</p>
-                <p className="text-2xl font-bold text-primary-400">{selectedTeacherAnalysis.averageClassScore.toFixed(1)}</p>
-              </div>
-              <div className="p-4 bg-dark-800 rounded-xl text-center">
-                <p className="text-dark-500 text-sm mb-1">نرخ پیشرفت</p>
-                <p className="text-2xl font-bold text-green-400">{selectedTeacherAnalysis.improvementRate.toFixed(0)}%</p>
-              </div>
-              <div className="p-4 bg-dark-800 rounded-xl text-center">
-                <p className="text-dark-500 text-sm mb-1">تکمیل تکالیف</p>
-                <p className="text-2xl font-bold text-yellow-400">{selectedTeacherAnalysis.homeworkCompletionRate.toFixed(0)}%</p>
-              </div>
-              <div className="p-4 bg-dark-800 rounded-xl text-center">
-                <p className="text-dark-500 text-sm mb-1">سختی آزمون</p>
-                <p className="text-2xl font-bold text-purple-400">{selectedTeacherAnalysis.examDifficulty.toFixed(0)}%</p>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-medium text-dark-100 mb-3">کلاس‌های تدریس</h4>
-              <div className="space-y-2">
-                {selectedTeacher.assignments.map((assignment, index) => {
-                  const book = books.find(b => b.id === assignment.lessonId);
-                  const grade = grades.find(g => g.id === assignment.gradeId);
-                  const cls = grade?.classes.find(c => c.id === assignment.classId);
-                  return (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-dark-800 rounded-xl">
-                      <BookOpen className="w-5 h-5 text-primary-400" />
-                      <span className="text-dark-200">{book?.name}</span>
-                      <span className="text-dark-500">-</span>
-                      <span className="text-dark-400">{grade?.name}</span>
-                      <span className="text-dark-500">-</span>
-                      <span className="text-dark-400">{cls?.name}</span>
+      {/* Teacher Performance Card */}
+      <Card>
+        <CardHeader
+          title="تحلیل عملکرد"
+          subtitle="شاخص‌های کلیدی"
+          icon={<ClipboardList className="w-5 h-5" />}
+        />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-4 bg-dark-800 rounded-xl text-center">
+            <p className="text-dark-500 text-sm mb-1">میانگین نمرات</p>
+            <p className="text-2xl font-bold text-primary-400">
+              {performance.averageClassScore.toFixed(1)}
+            </p>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl text-center">
+            <p className="text-dark-500 text-sm mb-1">نرخ پیشرفت</p>
+            <p className="text-2xl font-bold text-green-400">
+              {performance.improvementRate.toFixed(0)}%
+            </p>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl text-center">
+            <p className="text-dark-500 text-sm mb-1">تکمیل تکالیف</p>
+            <p className="text-2xl font-bold text-yellow-400">
+              {performance.homeworkCompletionRate.toFixed(0)}%
+            </p>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl text-center">
+            <p className="text-dark-500 text-sm mb-1">اثربخشی</p>
+            <p className="text-2xl font-bold text-purple-400">
+              {performance.effectiveness.toFixed(0)}%
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Risk Students & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Risk Students */}
+        <Card className="lg:col-span-2">
+          <CardHeader
+            title="دانش‌آموزان نیازمند توجه"
+            icon={<AlertTriangle className="w-5 h-5" />}
+            action={<Badge variant="warning">{studentsWithRisk.length} نفر</Badge>}
+          />
+          {studentsWithRisk.length > 0 ? (
+            <div className="space-y-3">
+              {studentsWithRisk.map(({ student, analysis }) => {
+                const grade = grades.find(g => g.id === student.gradeId);
+                const cls = grade?.classes.find(c => c.id === student.classId);
+                return (
+                  <div
+                    key={student.id}
+                    className="flex items-center justify-between p-4 bg-dark-800 rounded-xl"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
+                        analysis.riskScore > 75 ? 'bg-red-500/20 text-red-400' :
+                        'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {analysis.riskScore}
+                      </div>
+                      <div>
+                        <p className="font-medium text-dark-100">{student.fullName}</p>
+                        <p className="text-sm text-dark-500">{grade?.name} - {cls?.name}</p>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="text-sm text-dark-400">
+                      {analysis.factors[0]?.description}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="pt-4 border-t border-dark-700">
-              <div>
-                <span className="text-dark-500 text-sm">نام کاربری</span>
-                <p className="text-dark-200">@{selectedTeacher.username}</p>
-              </div>
+          ) : (
+            <div className="text-center py-8">
+              <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
+              <p className="text-dark-400">همه دانش‌آموزان در وضعیت خوب هستند</p>
             </div>
+          )}
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader
+            title="دسترسی سریع"
+            icon={<Clock className="w-5 h-5" />}
+          />
+          <div className="space-y-3">
+            <button className="w-full flex items-center gap-3 p-4 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-right">
+              <div className="p-2 bg-primary-600/20 rounded-lg">
+                <ClipboardList className="w-5 h-5 text-primary-400" />
+              </div>
+              <span className="text-dark-200">ثبت حضور و غیاب</span>
+            </button>
+            <button className="w-full flex items-center gap-3 p-4 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-right">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <BookOpen className="w-5 h-5 text-green-400" />
+              </div>
+              <span className="text-dark-200">ثبت نمره جدید</span>
+            </button>
+            <button className="w-full flex items-center gap-3 p-4 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-right">
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <GraduationCap className="w-5 h-5 text-yellow-400" />
+              </div>
+              <span className="text-dark-200">افزودن تکلیف</span>
+            </button>
           </div>
-        )}
-      </Modal>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default TeachersManagement;
+export default TeacherDashboard;

@@ -1,4 +1,3 @@
-// src/pages/Install/InstallWizard.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -16,7 +15,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { Button, Input, Card, Select, Badge } from '../../components/ui';
-import db, { generateId } from '../../services/database';
+import db, { generateId, hashPassword } from '../../services/database';
+import { generateDemoData } from '../../services/demoData';
 import type { Grade, Book, Consultant, Student, Teacher, Parent, SchoolClass } from '../../types';
 
 const STEPS = [
@@ -223,16 +223,17 @@ export const InstallWizard: React.FC = () => {
   };
 
   // Add Consultant
-  const addConsultant = () => {
+  const addConsultant = async () => {
     if (!consultantForm.fullName.trim() || !consultantForm.username.trim() || !consultantForm.password) {
       toast.error('همه فیلدها الزامی هستند');
       return;
     }
+    const hashedPassword = await hashPassword(consultantForm.password);
     const newConsultant: Consultant = {
       id: generateId(),
       fullName: consultantForm.fullName.trim(),
       username: consultantForm.username.trim(),
-      password: consultantForm.password,
+      password: hashedPassword,
       role: 'consultant',
       assignedGrades: [],
       createdAt: new Date().toISOString(),
@@ -244,7 +245,7 @@ export const InstallWizard: React.FC = () => {
   };
 
   // Add Student
-  const addStudent = () => {
+  const addStudent = async () => {
     if (
       !studentForm.fullName.trim() ||
       !studentForm.username.trim() ||
@@ -258,14 +259,16 @@ export const InstallWizard: React.FC = () => {
       return;
     }
 
+    const hashedStudentPassword = await hashPassword(studentForm.password);
     const parentUsername = `parent_${studentForm.username}`;
     const parentPassword = '123456';
+    const hashedParentPassword = await hashPassword(parentPassword);
 
     const newParent: Parent = {
       id: generateId(),
       fullName: `خانواده ${studentForm.fullName}`,
       username: parentUsername,
-      password: parentPassword,
+      password: hashedParentPassword,
       role: 'parent',
       studentIds: [],
       createdAt: new Date().toISOString(),
@@ -276,7 +279,7 @@ export const InstallWizard: React.FC = () => {
       id: generateId(),
       fullName: studentForm.fullName.trim(),
       username: studentForm.username.trim(),
-      password: studentForm.password,
+      password: hashedStudentPassword,
       role: 'student',
       gradeId: studentForm.gradeId,
       classId: studentForm.classId,
@@ -327,7 +330,7 @@ export const InstallWizard: React.FC = () => {
   };
 
   // Add Teacher
-  const addTeacher = () => {
+  const addTeacher = async () => {
     if (!teacherForm.fullName.trim() || !teacherForm.username.trim() || !teacherForm.password) {
       toast.error('همه فیلدها الزامی هستند');
       return;
@@ -337,11 +340,12 @@ export const InstallWizard: React.FC = () => {
       a => a.lessonId && a.gradeId && a.classId
     );
 
+    const hashedPassword = await hashPassword(teacherForm.password);
     const newTeacher: Teacher = {
       id: generateId(),
       fullName: teacherForm.fullName.trim(),
       username: teacherForm.username.trim(),
-      password: teacherForm.password,
+      password: hashedPassword,
       role: 'teacher',
       assignments: validAssignments,
       createdAt: new Date().toISOString(),
@@ -359,38 +363,45 @@ export const InstallWizard: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      const installData = {
-        admin: {
-          fullName: adminForm.fullName,
-          username: adminForm.username,
-          password: adminForm.password,
-        },
-        grades: grades,
-        books: books,
-        consultants: consultants.map(c => ({
-          fullName: c.fullName,
-          username: c.username,
-          password: c.password,
-          assignedGrades: c.assignedGrades || [],
-        })),
-        students: students.map(s => ({
-          ...s,
-          password: s.password,
-        })),
-        parents: parents.map(p => ({
-          ...p,
-          password: p.password,
-        })),
-        teachers: teachers.map(t => ({
-          fullName: t.fullName,
-          username: t.username,
-          password: t.password,
-          assignments: t.assignments || [],
-        })),
-      };
+      // Save Admin
+      const hashedAdminPassword = await hashPassword(adminForm.password);
+      db.createAdmin({
+        fullName: adminForm.fullName,
+        username: adminForm.username,
+        password: hashedAdminPassword,
+        role: 'admin',
+      });
 
-      await db.finishInstallation(installData);
-      db.resetInstallationCache();
+      // Save Grades
+      grades.forEach(grade => {
+        db.add('grades', grade);
+      });
+
+      // Save Books
+      books.forEach(book => {
+        db.add('books', book);
+      });
+
+      // Save Consultants
+      consultants.forEach(consultant => {
+        db.add('consultants', consultant);
+      });
+
+      // Save Students
+      students.forEach(student => {
+        db.add('students', student);
+      });
+
+      // Save Parents
+      parents.forEach(parent => {
+        db.add('parents', parent);
+      });
+
+      // Save Teachers
+      teachers.forEach(teacher => {
+        db.add('teachers', teacher);
+      });
+
       toast.success('نصب با موفقیت انجام شد!');
       handleNext();
     } catch (error) {
@@ -401,16 +412,28 @@ export const InstallWizard: React.FC = () => {
     }
   };
 
-  // Quick setup with demo data (optional)
+  // Quick setup with demo data
   const setupWithDemoData = async () => {
     if (!validateAdmin()) return;
+    
     setIsProcessing(true);
     try {
-      toast.error('ویژگی داده‌های نمونه در نسخه API در حال توسعه است');
-      setIsProcessing(false);
+      const hashedAdminPassword = await hashPassword(adminForm.password);
+      db.createAdmin({
+        fullName: adminForm.fullName,
+        username: adminForm.username,
+        password: hashedAdminPassword,
+        role: 'admin',
+      });
+      
+      await generateDemoData();
+      
+      toast.success('نصب با داده‌های نمونه انجام شد');
+      navigate('/login');
     } catch (error) {
-      toast.error('خطا در نصب');
+      toast.error('خطا در نصب سیستم');
       console.error(error);
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -424,7 +447,6 @@ export const InstallWizard: React.FC = () => {
     return grade?.classes || [];
   };
 
-  // ===== UPDATED VALIDATION: Step 4 now required =====
   const validateCurrentStep = (): boolean => {
     switch (currentStep) {
       case 1:
@@ -442,12 +464,6 @@ export const InstallWizard: React.FC = () => {
           return false;
         }
         return true;
-      case 4:
-        if (books.length === 0) {
-          toast.error('حداقل یک درس باید اضافه شود (الزامی)');
-          return false;
-        }
-        return true;
       default:
         return true;
     }
@@ -461,7 +477,6 @@ export const InstallWizard: React.FC = () => {
     }
   };
 
-  // ===== Render Step Content =====
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -500,6 +515,7 @@ export const InstallWizard: React.FC = () => {
               onChange={(e) => setAdminForm({ ...adminForm, confirmPassword: e.target.value })}
               placeholder="تکرار رمز عبور"
             />
+            
             <div className="mt-8 pt-6 border-t border-dark-700">
               <p className="text-dark-400 text-sm text-center mb-4">
                 برای تست سریع سیستم، می‌توانید با داده‌های نمونه نصب کنید
@@ -606,7 +622,6 @@ export const InstallWizard: React.FC = () => {
           </div>
         );
 
-      // ===== STEP 4 - UPDATED: Removed "اختیاری" and made mandatory =====
       case 4:
         return (
           <div className="space-y-6">
@@ -615,9 +630,7 @@ export const InstallWizard: React.FC = () => {
                 <BookOpen className="w-8 h-8 text-primary-400" />
               </div>
               <h2 className="text-2xl font-bold text-dark-100">دروس</h2>
-              <p className="text-dark-400 mt-2">
-                دروس مدرسه را با درجه اهمیت اضافه کنید <span className="text-red-400 font-bold">(الزامی)</span>
-              </p>
+              <p className="text-dark-400 mt-2">دروس مدرسه را با درجه اهمیت اضافه کنید (اختیاری)</p>
             </div>
             <div className="flex gap-3">
               <Input
@@ -653,11 +666,6 @@ export const InstallWizard: React.FC = () => {
                 </div>
               ))}
             </div>
-            {books.length === 0 && (
-              <div className="text-center py-4 text-dark-500 text-sm">
-                هنوز درسی اضافه نشده است. حداقل یک درس اضافه کنید.
-              </div>
-            )}
           </div>
         );
 
@@ -883,6 +891,7 @@ export const InstallWizard: React.FC = () => {
               <h2 className="text-2xl font-bold text-dark-100">نصب کامل شد!</h2>
               <p className="text-dark-400 mt-2">سیستم با موفقیت نصب شد. اکنون می‌توانید وارد شوید.</p>
             </div>
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="p-4 bg-dark-800 rounded-xl text-center">
                 <p className="text-2xl font-bold text-primary-400">{grades.length}</p>
@@ -901,6 +910,7 @@ export const InstallWizard: React.FC = () => {
                 <p className="text-dark-500 text-sm">مشاور</p>
               </div>
             </div>
+
             <Button onClick={goToLogin} className="w-full" size="lg">
               ورود به سیستم
             </Button>
@@ -912,7 +922,6 @@ export const InstallWizard: React.FC = () => {
     }
   };
 
-  // ===== Render =====
   return (
     <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
@@ -962,7 +971,7 @@ export const InstallWizard: React.FC = () => {
                 loading={isProcessing}
                 icon={currentStep === 7 ? <CheckCircle className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
               >
-                {currentStep === 7 ? 'اتمام نصب' : currentStep === 4 ? 'بعدی' : 'بعدی'}
+                {currentStep === 7 ? 'اتمام نصب' : currentStep === 4 ? 'بعدی / رد کردن' : 'بعدی'}
               </Button>
             </div>
           )}
