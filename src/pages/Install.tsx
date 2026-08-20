@@ -598,8 +598,15 @@ function StepTeachers({
   takenUsernames: string[];
 }) {
   const [assign, setAssign] = useState<{ lessonIdx: number; gradeIdx: number; classIdx: number }[]>([]);
-  const [draft, setDraft] = useState({ lessonIdx: 0, gradeIdx: 0, classIdx: 0 });
+  const [draft, setDraft] = useState<{ lessonIdx: number; gradeIdx: number; classIdx: number }>({ lessonIdx: 0, gradeIdx: 0, classIdx: 0 });
   const { register, handleSubmit, reset } = useForm<EntryForm>({ defaultValues: { fullName: "", username: "", password: "" } });
+  const classOptions = classNames[draft.gradeIdx] ?? [];
+  const addAssignment = () => {
+    if (!lessons[draft.lessonIdx]) return notify.error("ابتدا یک درس انتخاب کنید");
+    if (!classOptions[draft.classIdx]) return notify.error("ابتدا یک کلاس انتخاب کنید");
+    setAssign((a) => [...a, { ...draft }]);
+    setDraft((prev) => ({ ...prev, classIdx: 0 }));
+  };
   if (lessons.length === 0) {
     return (
       <div>
@@ -648,10 +655,11 @@ function StepTeachers({
           if (!v.fullName.trim() || !v.username.trim()) return notify.error("نام و نام کاربری الزامی است");
           if (validatePassword(v.password)) return notify.error("رمز عبور ضعیف است");
           if (takenUsernames.some((u) => u && u.toLowerCase() === v.username.toLowerCase())) return notify.error("این نام کاربری قبلاً استفاده شده است");
-          if (assign.length === 0) return notify.error("حداقل یک درس و کلاس اختصاص دهید");
+          if (assign.length === 0) return notify.error("حداقل یک درس و کلاس برای دبیر انتخاب کنید");
           setItems([...items, { fullName: v.fullName.trim(), username: v.username.trim(), password: v.password, assignments: [...assign] }]);
           reset({ fullName: "", username: "", password: "" });
           setAssign([]);
+          setDraft({ lessonIdx: 0, gradeIdx: 0, classIdx: 0 });
         })}
       >
         <div className="mb-4 grid gap-3 rounded-xl border border-slate-700/50 bg-[#0b1222] p-4 sm:grid-cols-4">
@@ -673,7 +681,10 @@ function StepTeachers({
             </Select>
           </Field>
           <Field label="پایه">
-            <Select value={draft.gradeIdx} onChange={(e) => setDraft((d) => ({ ...d, gradeIdx: Number(e.target.value), classIdx: 0 }))}>
+            <Select value={draft.gradeIdx} onChange={(e) => {
+              const gradeIdx = Number(e.target.value);
+              setDraft((d) => ({ ...d, gradeIdx, classIdx: 0 }));
+            }}>
               {gradeNames.map((g, i) => (
                 <option key={i} value={i}>
                   {g}
@@ -691,14 +702,14 @@ function StepTeachers({
             </Select>
           </Field>
           <div className="flex items-end">
-            <Button type="button" variant="ghost" onClick={() => setAssign((a) => [...a, draft])}>
+            <Button type="button" variant="ghost" onClick={addAssignment}>
               <Plus size={14} /> افزودن تدریس
             </Button>
           </div>
         </div>
         <div className="space-y-2">
           {assign.map((a, i) => (
-            <div key={i} className="flex items-center gap-2 rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-[12px] text-blue-200">
+            <div key={`${a.lessonIdx}-${a.gradeIdx}-${a.classIdx}-${i}`} className="flex items-center gap-2 rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-[12px] text-blue-200">
               {lessons[a.lessonIdx]?.name} — {gradeNames[a.gradeIdx]} — {classNames[a.gradeIdx]?.[a.classIdx]}
               <button type="button" onClick={() => setAssign(assign.filter((_, xi) => xi !== i))} className="mr-auto text-slate-400 hover:text-rose-400 cursor-pointer">
                 <Trash2 size={13} />
