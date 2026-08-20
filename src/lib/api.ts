@@ -980,6 +980,69 @@ export async function addStudentRecord(payload: {
   return { student, parent, parentPassword };
 }
 
+export async function updateStudentRecord(studentId: string, payload: {
+  fullName?: string;
+  username?: string;
+  password?: string;
+  gradeId?: string;
+  classId?: string;
+  nationalId?: string;
+  fatherName?: string;
+  motherName?: string;
+  phone?: string;
+  emergencyPhone?: string;
+}): Promise<void> {
+  await sleep(LATENCY_MS / 2);
+  const studentsFile = readDb<StudentsFile>("students");
+  const parentsFile = readDb<ParentsFile>("parents");
+  const idx = studentsFile.students.findIndex((s) => s.id === studentId);
+  if (idx === -1) throw new Error("دانش‌آموز یافت نشد");
+  const student = studentsFile.students[idx];
+  // Check username uniqueness if changing
+  if (payload.username && payload.username.toLowerCase() !== student.username.toLowerCase()) {
+    const exists = studentsFile.students.some((s) => s.id !== studentId && s.username.toLowerCase() === payload.username!.toLowerCase());
+    if (exists) throw new Error("نام کاربری قبلاً استفاده شده است");
+  }
+  let newPasswordHash = student.passwordHash;
+  let newSalt = student.salt;
+  if (payload.password) {
+    const h = await hashPassword(payload.password);
+    newPasswordHash = h.hash;
+    newSalt = h.salt;
+  }
+  const updated: Student = {
+    ...student,
+    fullName: payload.fullName ?? student.fullName,
+    username: payload.username ?? student.username,
+    passwordHash: newPasswordHash,
+    salt: newSalt,
+    gradeId: payload.gradeId ?? student.gradeId,
+    classId: payload.classId ?? student.classId,
+    nationalId: payload.nationalId ?? student.nationalId,
+    fatherName: payload.fatherName ?? student.fatherName,
+    motherName: payload.motherName ?? student.motherName,
+    phone: payload.phone ?? student.phone,
+    emergencyPhone: payload.emergencyPhone ?? student.emergencyPhone,
+  };
+  // Update parent's username if student username changed
+  if (payload.username) {
+    const parent = parentsFile.parents.find((p) => p.studentId === studentId);
+    if (parent) {
+      const newParentUsername = `parent_${payload.username.trim()}`;
+      updateDb<ParentsFile>("parents", (d) => ({
+        ...d,
+        parents: d.parents.map((p) => (p.id === parent.id ? { ...p, username: newParentUsername } : p)),
+      }));
+    }
+  }
+  updateDb<StudentsFile>("students", (d) => ({
+    ...d,
+    students: d.students.map((s) => (s.id === studentId ? updated : s)),
+  }));
+  logActivity("admin", "مدیر", `دانش‌آموز «${updated.fullName}» ویرایش شد`);
+  recompute();
+}
+
 export async function addTeacherRecord(payload: {
   fullName: string;
   username: string;
@@ -1006,6 +1069,44 @@ export async function addTeacherRecord(payload: {
   logActivity("admin", "مدیر", `دبیر «${teacher.fullName}» اضافه شد`);
   recompute();
   return { teacher };
+}
+
+export async function updateTeacherRecord(teacherId: string, payload: {
+  fullName?: string;
+  username?: string;
+  password?: string;
+  assignments?: { lessonId: string; gradeId: string; classId: string }[];
+}): Promise<void> {
+  await sleep(LATENCY_MS / 2);
+  const teachersFile = readDb<TeachersFile>("teachers");
+  const idx = teachersFile.teachers.findIndex((t) => t.id === teacherId);
+  if (idx === -1) throw new Error("دبیر یافت نشد");
+  const teacher = teachersFile.teachers[idx];
+  if (payload.username && payload.username.toLowerCase() !== teacher.username.toLowerCase()) {
+    const exists = teachersFile.teachers.some((t) => t.id !== teacherId && t.username.toLowerCase() === payload.username!.toLowerCase());
+    if (exists) throw new Error("نام کاربری قبلاً استفاده شده است");
+  }
+  let newPasswordHash = teacher.passwordHash;
+  let newSalt = teacher.salt;
+  if (payload.password) {
+    const h = await hashPassword(payload.password);
+    newPasswordHash = h.hash;
+    newSalt = h.salt;
+  }
+  const updated: Teacher = {
+    ...teacher,
+    fullName: payload.fullName ?? teacher.fullName,
+    username: payload.username ?? teacher.username,
+    passwordHash: newPasswordHash,
+    salt: newSalt,
+    assignments: payload.assignments ?? teacher.assignments,
+  };
+  updateDb<TeachersFile>("teachers", (d) => ({
+    ...d,
+    teachers: d.teachers.map((t) => (t.id === teacherId ? updated : t)),
+  }));
+  logActivity("admin", "مدیر", `دبیر «${updated.fullName}» ویرایش شد`);
+  recompute();
 }
 
 /* ================= teacher ================= */

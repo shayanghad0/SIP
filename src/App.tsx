@@ -79,7 +79,6 @@ function DashboardRoute() {
 }
 
 function AppInner() {
-  // Refresh the session when the tab regains focus (token expiry handling)
   const { refresh } = useSession();
   useEffect(() => {
     const on = () => void refresh();

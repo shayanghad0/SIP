@@ -75,12 +75,10 @@ export function AppShell({ role, userName, nav, section, onNavigate, onLogout, c
 
   return (
     <div className="flex min-h-screen">
-      {/* sidebar — right side in RTL */}
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 border-l border-slate-800/70 bg-[#0a101f]/80 backdrop-blur lg:block">
         {sidebar}
       </aside>
 
-      {/* mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />

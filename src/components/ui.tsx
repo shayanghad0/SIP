@@ -4,8 +4,6 @@ import { useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type Rea
 import { cn } from "../utils/cn";
 import { faNum } from "../lib/format";
 
-/* ---------------- toast ---------------- */
-
 export function ToasterSetup() {
   return (
     <Toaster
@@ -32,8 +30,6 @@ export const notify = {
   error: (m: string) => toast.error(m),
   info: (m: string) => toast(m),
 };
-
-/* ---------------- primitives ---------------- */
 
 type ButtonVariant = "primary" | "ghost" | "danger" | "outline" | "success";
 
@@ -146,8 +142,6 @@ export function Badge({ tone = "slate", children, className }: { tone?: Tone; ch
   return <span className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-medium", TONES[tone].chip, className)}>{children}</span>;
 }
 
-/* ---------------- risk helpers ---------------- */
-
 export function riskTone(score: number): Tone {
   if (score < 25) return "emerald";
   if (score < 50) return "amber";
@@ -185,8 +179,6 @@ export function ProgressBar({ value, tone = "blue" }: { value: number; tone?: To
   );
 }
 
-/* ---------------- modal ---------------- */
-
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: ReactNode; wide?: boolean }) {
   if (!open) return null;
   return (
@@ -204,8 +196,6 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
     </div>
   );
 }
-
-/* ---------------- skeletons / empty ---------------- */
 
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("skeleton", className)} />;
@@ -234,8 +224,6 @@ export function EmptyState({ icon, title, desc, action }: { icon: ReactNode; tit
   );
 }
 
-/* ---------------- tabs ---------------- */
-
 export function Tabs({ tabs, active, onChange }: { tabs: { key: string; label: string }[]; active: string; onChange: (k: string) => void }) {
   return (
     <div className="flex flex-wrap gap-1 rounded-xl border border-slate-700/50 bg-[#0b1222] p-1">
@@ -254,8 +242,6 @@ export function Tabs({ tabs, active, onChange }: { tabs: { key: string; label: s
     </div>
   );
 }
-
-/* ---------------- copy button ---------------- */
 
 export function CopyButton({ text }: { text: string }) {
   const [done, setDone] = useState(false);
@@ -277,8 +263,6 @@ export function CopyButton({ text }: { text: string }) {
     </button>
   );
 }
-
-/* ---------------- page header ---------------- */
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
