@@ -919,6 +919,95 @@ export function healthDetail(): { files: { file: string; ok: boolean; bytes: num
   return dbHealth();
 }
 
+/* ================= admin add student/teacher helpers ================= */
+
+export async function addStudentRecord(payload: {
+  fullName: string;
+  username: string;
+  password: string;
+  gradeId: string;
+  classId: string;
+  nationalId?: string;
+  fatherName?: string;
+  motherName?: string;
+  phone?: string;
+  emergencyPhone?: string;
+}): Promise<{ student: Student; parent: Parent; parentPassword: string }> {
+  await sleep(LATENCY_MS / 2);
+  const studentsFile = readDb<StudentsFile>("students");
+  const parentsFile = readDb<ParentsFile>("parents");
+  const exists = studentsFile.students.find((s) => s.username.toLowerCase() === payload.username.toLowerCase());
+  if (exists) throw new Error("نام کاربری دانش‌آموز قبلاً وجود دارد");
+  const parentPassword = generatePassword();
+  const stHash = await hashPassword(payload.password);
+  const parHash = await hashPassword(parentPassword);
+  const stId = nextId("st");
+  const parId = nextId("par");
+  const student: Student = {
+    id: stId,
+    role: "student",
+    fullName: payload.fullName,
+    username: payload.username,
+    passwordHash: stHash.hash,
+    salt: stHash.salt,
+    accessCode: generateAccessCode("student"),
+    createdAt: new Date().toISOString(),
+    gradeId: payload.gradeId,
+    classId: payload.classId,
+    nationalId: payload.nationalId || undefined,
+    fatherName: payload.fatherName || "",
+    motherName: payload.motherName || "",
+    phone: payload.phone || "",
+    emergencyPhone: payload.emergencyPhone || "",
+    parentUserId: parId,
+  };
+  const parentUsername = `parent_${payload.username.trim()}`;
+  const parent: Parent = {
+    id: parId,
+    role: "parent",
+    fullName: payload.fatherName ? `${payload.fatherName} (والدین)` : "والدین",
+    username: parentUsername,
+    passwordHash: parHash.hash,
+    salt: parHash.salt,
+    accessCode: generateAccessCode("parent"),
+    createdAt: new Date().toISOString(),
+    studentId: stId,
+  };
+  updateDb<StudentsFile>("students", (d) => ({ ...d, students: [...d.students, student] }));
+  updateDb<ParentsFile>("parents", (d) => ({ ...d, parents: [...d.parents, parent] }));
+  logActivity("admin", "مدیر", `دانش‌آموز «${student.fullName}» اضافه شد`);
+  recompute();
+  return { student, parent, parentPassword };
+}
+
+export async function addTeacherRecord(payload: {
+  fullName: string;
+  username: string;
+  password: string;
+  assignments: { lessonId: string; gradeId: string; classId: string }[];
+}): Promise<{ teacher: Teacher }> {
+  await sleep(LATENCY_MS / 2);
+  const teachersFile = readDb<TeachersFile>("teachers");
+  const exists = teachersFile.teachers.find((t) => t.username.toLowerCase() === payload.username.toLowerCase());
+  if (exists) throw new Error("نام کاربری دبیر قبلاً وجود دارد");
+  const h = await hashPassword(payload.password);
+  const teacher: Teacher = {
+    id: nextId("tch"),
+    role: "teacher",
+    fullName: payload.fullName,
+    username: payload.username,
+    passwordHash: h.hash,
+    salt: h.salt,
+    accessCode: generateAccessCode("teacher"),
+    createdAt: new Date().toISOString(),
+    assignments: payload.assignments.map((a) => ({ lessonId: a.lessonId, gradeId: a.gradeId, classId: a.classId })),
+  };
+  updateDb<TeachersFile>("teachers", (d) => ({ ...d, teachers: [...d.teachers, teacher] }));
+  logActivity("admin", "مدیر", `دبیر «${teacher.fullName}» اضافه شد`);
+  recompute();
+  return { teacher };
+}
+
 /* ================= teacher ================= */
 
 export interface TeacherClassView {

@@ -7,6 +7,8 @@ import {
   addLesson,
   adminOverview,
   alertsList,
+  addStudentRecord,
+  addTeacherRecord,
   consultantsList,
   healthDetail,
   loadDemoData,
@@ -25,7 +27,8 @@ import {
 import { useSession } from "../lib/session";
 import { faDate, faNum } from "../lib/format";
 import { AppShell, type NavItem } from "../components/layout";
-import { Badge, Button, Card, EmptyState, Field, Input, notify, PageHeader, ProgressBar, RiskBar, Select, SkeletonGrid, StatCard, riskTone } from "../components/ui";
+import { Badge, Button, Card, EmptyState, Field, Input, notify, PageHeader, ProgressBar, RiskBar, Select, SkeletonGrid, StatCard, riskTone, Modal } from "../components/ui";
+import { useForm } from "react-hook-form";
 import { readDb } from "../lib/db";
 import type { GradesFile } from "../lib/types";
 
@@ -215,6 +218,14 @@ function Overview({ onOpenReport }: { onOpenReport: (id: string) => void }) {
 
 function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
   const [rows, setRows] = useState<StudentRow[] | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const gradesData = readDb<GradesFile>("grades");
+  const gradeOptions = gradesData.grades;
+  const classesByGrade = gradesData.classes.reduce<Record<string, { id: string; name: string }[]>>((acc, c) => {
+    (acc[c.gradeId] = acc[c.gradeId] || []).push({ id: c.id, name: c.name });
+    return acc;
+  }, {});
+  const { register, handleSubmit, reset } = useForm<any>({ defaultValues: { fullName: "", username: "", password: "", gradeId: gradeOptions[0]?.id ?? "", classId: classesByGrade[gradeOptions[0]?.id ?? ""]?.[0]?.id ?? "", nationalId: "", fatherName: "", motherName: "", phone: "", emergencyPhone: "" } });
   const [q, setQ] = useState("");
   useEffect(() => {
     studentsList().then(setRows);
@@ -223,7 +234,16 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
   const filtered = rows.filter((r) => r.student.fullName.includes(q) || r.classLabel.includes(q));
   return (
     <div>
-      <PageHeader title="دانش‌آموزان" subtitle={`${faNum(rows.length)} دانش‌آموز — مرتب‌شده بر اساس ریسک`} actions={<Input className="max-w-56" placeholder="جستجو…" value={q} onChange={(e) => setQ(e.target.value)} />} />
+      <PageHeader
+        title="دانش‌آموزان"
+        subtitle={`${faNum(rows.length)} دانش‌آموز — مرتب‌شده بر اساس ریسک`}
+        actions={
+          <div className="flex items-center gap-2">
+            <Input className="max-w-56" placeholder="جستجو…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Button variant="outline" onClick={() => setShowAdd(true)}><UserPlus size={14} /> افزودن دانش‌آموز</Button>
+          </div>
+        }
+      />
       {filtered.length === 0 ? (
         <EmptyState icon={<Users size={22} />} title="دانش‌آموزی یافت نشد" desc="دانش‌آموزان را از صفحه نصب اضافه کنید یا داده‌های نمونه را بارگذاری کنید." />
       ) : (
@@ -260,6 +280,54 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
           </table>
         </div>
       )}
+
+      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="افزودن دانش‌آموز">
+        <form onSubmit={handleSubmit(async (v) => {
+          try {
+            const res = await addStudentRecord({
+              fullName: v.fullName.trim(),
+              username: v.username.trim(),
+              password: v.password,
+              gradeId: v.gradeId,
+              classId: v.classId,
+              nationalId: v.nationalId,
+              fatherName: v.fatherName,
+              motherName: v.motherName,
+              phone: v.phone,
+              emergencyPhone: v.emergencyPhone,
+            });
+            notify.success("دانش‌آموز اضافه شد — حساب والدین نیز ساخته شد");
+            setShowAdd(false);
+            reset();
+            studentsList().then(setRows);
+            notify.info(`والد: ${res.parent.username} / رمز: ${res.parentPassword}`);
+          } catch (e: any) {
+            notify.error(e?.message ?? "خطا در افزودن دانش‌آموز");
+          }
+        })} className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Field label="نام و نام خانوادگی"><Input {...register("fullName", { required: true })} /></Field>
+            <Field label="نام کاربری"><Input dir="ltr" {...register("username", { required: true })} /></Field>
+            <Field label="رمز عبور"><Input dir="ltr" type="password" {...register("password", { required: true })} /></Field>
+            <Field label="پایه">
+              <Select {...register("gradeId")}>{gradeOptions.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}</Select>
+            </Field>
+            <Field label="کلاس">
+              <Select {...register("classId")}>
+                {(classesByGrade[gradeOptions[0]?.id ?? ""] ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </Select>
+            </Field>
+            <Field label="کد ملی (اختیاری)"><Input dir="ltr" {...register("nationalId")} /></Field>
+            <Field label="نام پدر"><Input {...register("fatherName")} /></Field>
+            <Field label="نام مادر"><Input {...register("motherName")} /></Field>
+            <Field label="تلفن"><Input dir="ltr" {...register("phone")} /></Field>
+            <Field label="تلفن اضطراری"><Input dir="ltr" {...register("emergencyPhone")} /></Field>
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit">افزودن</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -422,19 +490,78 @@ function RowCells({ row }: { row: { grade: string; cells: { lesson: string; valu
 
 function Teachers() {
   const [rows, setRows] = useState<TeacherRow[] | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const gradesData = readDb<GradesFile>("grades");
+  const lessons = readDb<BooksFile>("books");
+  const gradeOptions = gradesData.grades;
+  const classesByGrade = gradesData.classes.reduce<Record<string, { id: string; name: string }[]>>((acc, c) => {
+    (acc[c.gradeId] = acc[c.gradeId] || []).push({ id: c.id, name: c.name });
+    return acc;
+  }, {});
+  const { register, handleSubmit, reset } = useForm<any>({ defaultValues: { fullName: "", username: "", password: "", assignments: [] } });
   useEffect(() => {
     teachersList().then(setRows);
   }, []);
   if (!rows) return <SkeletonGrid rows={4} />;
   return (
     <div>
-      <PageHeader title="دبیران" subtitle="تحلیل عملکرد تدریس هر دبیر توسط موتور تحلیل دبیر" />
+      <PageHeader title="دبیران" subtitle="تحلیل عملکرد تدریس هر دبیر توسط موتور تحلیل دبیر" actions={<Button variant="outline" onClick={() => setShowAdd(true)}><UserPlus size={14} /> افزودن دبیر</Button>} />
       <div className="grid gap-4 md:grid-cols-2">
         {rows.map((t) => (
           <Card key={t.teacher.id}>
             <div className="mb-3 flex items-start justify-between">
               <div>
-                <p className="text-[14px] font-semibold text-slate-100">{t.teacher.fullName}</p>
+                {rows.length === 0 && <EmptyState icon={<GraduationCap size={22} />} title="دبیری ثبت نشده است" />}
+      
+              <Modal open={showAdd} onClose={() => setShowAdd(false)} title="افزودن دبیر">
+                <form onSubmit={handleSubmit(async (v) => {
+                  try {
+                    // v.assignments will be constructed from temporary selects on the form
+                    const assEls = Array.from(document.querySelectorAll<HTMLDivElement>('.admin-teacher-assignment'));
+                    const assignments: { lessonId: string; gradeId: string; classId: string }[] = assEls.map((el) => ({ lessonId: el.dataset.lessonId!, gradeId: el.dataset.gradeId!, classId: el.dataset.classId! }));
+                    const res = await addTeacherRecord({ fullName: v.fullName.trim(), username: v.username.trim(), password: v.password, assignments });
+                    notify.success('دبیر اضافه شد');
+                    setShowAdd(false);
+                    reset();
+                    teachersList().then(setRows);
+                  } catch (e: any) {
+                    notify.error(e?.message ?? 'خطا در افزودن دبیر');
+                  }
+                })} className="space-y-3">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Field label="نام و نام خانوادگی"><Input {...register('fullName', { required: true })} /></Field>
+                    <Field label="نام کاربری"><Input dir="ltr" {...register('username', { required: true })} /></Field>
+                    <Field label="رمز عبور"><Input dir="ltr" type="password" {...register('password', { required: true })} /></Field>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-slate-300">افزودن اختصاص‌ها (درس • پایه • کلاس) — حداقل یک مورد لازم است</p>
+                    <div className="space-y-2">
+                      {assignments.map((as, idx) => (
+                        <div key={idx} className="grid grid-cols-3 gap-2">
+                          <Select value={as.lessonId} onChange={(e) => setAssignments((s) => s.map((it, i) => (i === idx ? { ...it, lessonId: e.target.value } : it)))}>
+                            {lessons.lessons.map((l) => (
+                              <option key={l.id} value={l.id}>{l.name}</option>
+                            ))}
+                          </Select>
+                          <Select value={as.gradeId} onChange={(e) => setAssignments((s) => s.map((it, i) => (i === idx ? { ...it, gradeId: e.target.value, classId: classesByGrade[e.target.value]?.[0]?.id ?? "" } : it)))}>
+                            {gradeOptions.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                          </Select>
+                          <div className="flex gap-2">
+                            <Select value={as.classId} onChange={(e) => setAssignments((s) => s.map((it, i) => (i === idx ? { ...it, classId: e.target.value } : it)))}>
+                              {(classesByGrade[as.gradeId] ?? []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </Select>
+                            <Button variant="ghost" type="button" onClick={() => setAssignments((s) => s.filter((_x, i) => i !== idx))}>حذف</Button>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <Button variant="outline" type="button" onClick={() => setAssignments((s) => [...s, { lessonId: lessons.lessons[0]?.id ?? "", gradeId: gradeOptions[0]?.id ?? "", classId: classesByGrade[gradeOptions[0]?.id ?? ""]?.[0]?.id ?? "" }])}>افزودن اختصاص دیگر</Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end"><Button type="submit">افزودن</Button></div>
+                </form>
+              </Modal>
                 <p dir="ltr" className="text-right text-[11px] text-slate-500">{t.teacher.username}</p>
               </div>
               <Badge tone={t.analytics.efficiency >= 65 ? "emerald" : t.analytics.efficiency >= 45 ? "amber" : "rose"}>
