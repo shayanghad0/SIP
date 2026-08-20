@@ -43,13 +43,18 @@ async function sha256Hex(text: string): Promise<string> {
   return toHex(digest);
 }
 
+// Cache the secret key to avoid repeated localStorage access
+let cachedSecret: string | null = null;
+
 function getSecret(): string {
+  if (cachedSecret) return cachedSecret;
   let secret = localStorage.getItem(SECRET_KEY);
   if (!secret) {
     const bytes = crypto.getRandomValues(new Uint8Array(32));
     secret = toHex(bytes.buffer);
     localStorage.setItem(SECRET_KEY, secret);
   }
+  cachedSecret = secret;
   return secret;
 }
 
@@ -106,11 +111,21 @@ function b64urlDecode(input: string): string {
   return decodeURIComponent(escape(atob(input.replace(/-/g, "+").replace(/_/g, "/") + pad)));
 }
 
-async function hmacSign(data: string): Promise<string> {
+// Cache the HMAC key to avoid repeated imports
+let cachedHmacKey: CryptoKey | null = null;
+
+async function getHmacKey(): Promise<CryptoKey> {
+  if (cachedHmacKey) return cachedHmacKey;
   const keyData = te.encode(getSecret());
   const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, [
     "sign",
   ]);
+  cachedHmacKey = cryptoKey;
+  return cryptoKey;
+}
+
+async function hmacSign(data: string): Promise<string> {
+  const cryptoKey = await getHmacKey();
   const sig = await crypto.subtle.sign("HMAC", cryptoKey, te.encode(data));
   return toHex(sig);
 }

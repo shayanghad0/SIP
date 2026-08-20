@@ -63,7 +63,7 @@ import type {
   Role,
 } from "./types";
 
-const LATENCY_MS = 240;
+const LATENCY_MS = 0;
 const DEMO_ROUNDS_AGO_DAYS = [150, 110, 70, 30];
 const DEMO_ATTENDANCE_RECORDS = 15;
 const DEMO_ATTENDANCE_SCAN_DAYS = 34;
@@ -72,8 +72,8 @@ const ALERT_CAP = 40;
 const ACTIVITY_CAP = 60;
 const RISK_SUGGESTION_FROM = 50;
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
+function sleep(_ms: number): Promise<void> {
+  return Promise.resolve();
 }
 
 function avgOf(vals: number[]): number {
@@ -125,7 +125,6 @@ const DEFAULT_LESSONS: { name: string; importance: number }[] = [
 ];
 
 export async function install(payload: InstallPayload): Promise<InstallResult> {
-  await sleep(650);
   resetDatabase();
   const records: AccessRecord[] = [];
 
@@ -537,12 +536,10 @@ export function seedDemo(): void {
 /* ================= session ================= */
 
 export async function bootstrap(): Promise<{ installed: boolean; session: TokenPayload | null }> {
-  await sleep(150);
   return { installed: isInstalled(), session: await verifyToken(readToken()) };
 }
 
 export async function login(username: string, password: string) {
-  await sleep(400);
   const result = await attemptLogin(username, password);
   if (result.ok && result.user) logActivity(result.user.role, roleLabel(result.user.role), `${result.user.name} وارد سامانه شد`);
   return result;
@@ -594,7 +591,6 @@ function candidateDatesTrend(): string[] {
 }
 
 export async function adminOverview(): Promise<OverviewData> {
-  await sleep(LATENCY_MS);
   const students = readDb<StudentsFile>("students");
   const grades = readDb<GradesFile>("grades");
   const notes = readDb<NotesFile>("notes");
@@ -664,7 +660,6 @@ export interface StudentRow {
 }
 
 export async function studentsList(): Promise<StudentRow[]> {
-  await sleep(LATENCY_MS);
   const students = readDb<StudentsFile>("students");
   const ai = readDb<AiFile>("ai-analysis");
   const L = labels();
@@ -688,7 +683,6 @@ export interface ReportData {
 }
 
 export async function studentReport(studentId: string): Promise<ReportData> {
-  await sleep(LATENCY_MS / 2);
   const students = readDb<StudentsFile>("students");
   const grades = readDb<GradesFile>("grades");
   const books = readDb<BooksFile>("books");
@@ -780,7 +774,6 @@ export interface TeacherRow {
 }
 
 export async function teachersList(): Promise<TeacherRow[]> {
-  await sleep(LATENCY_MS);
   const teachers = readDb<TeachersFile>("teachers").teachers;
   const ai = readDb<AiFile>("ai-analysis");
   const L = labels();
@@ -792,7 +785,6 @@ export async function teachersList(): Promise<TeacherRow[]> {
 }
 
 export async function parentsList(): Promise<{ parent: Parent; studentName: string; classLabel: string; risk: number }[]> {
-  await sleep(LATENCY_MS);
   const parents = readDb<ParentsFile>("parents").parents;
   const students = readDb<StudentsFile>("students");
   const ai = readDb<AiFile>("ai-analysis");
@@ -819,7 +811,6 @@ export interface SchoolAnalyticsData {
 }
 
 export async function schoolAnalytics(): Promise<SchoolAnalyticsData> {
-  await sleep(LATENCY_MS);
   const grades = readDb<GradesFile>("grades");
   const books = readDb<BooksFile>("books");
   const students = readDb<StudentsFile>("students");
@@ -877,7 +868,6 @@ export async function schoolAnalyticsFull(): Promise<SchoolAnalyticsData> {
 }
 
 export async function alertsList(): Promise<AlertNamed[]> {
-  await sleep(LATENCY_MS / 2);
   const notes = readDb<NotesFile>("notes");
   const students = readDb<StudentsFile>("students");
   return notes.alerts.map((a) => ({ ...a, studentName: students.students.find((s) => s.id === a.studentId)?.fullName ?? "؟" }));
@@ -904,10 +894,9 @@ export function addLesson(name: string, importance: number): void {
 }
 
 export async function loadDemoData(): Promise<void> {
-  await sleep(700);
   seedDemo();
   recompute();
-  logActivity("admin", "مدیر", "داده‌های نمونه بارگذاری شد");
+  logActivity("admin", "مدیر", "دادههای نمونه بارگذاری شد");
 }
 
 export function systemReset(): void {
@@ -933,7 +922,6 @@ export async function addStudentRecord(payload: {
   phone?: string;
   emergencyPhone?: string;
 }): Promise<{ student: Student; parent: Parent; parentPassword: string }> {
-  await sleep(LATENCY_MS / 2);
   const studentsFile = readDb<StudentsFile>("students");
   const parentsFile = readDb<ParentsFile>("parents");
   const exists = studentsFile.students.find((s) => s.username.toLowerCase() === payload.username.toLowerCase());
@@ -992,7 +980,6 @@ export async function updateStudentRecord(studentId: string, payload: {
   phone?: string;
   emergencyPhone?: string;
 }): Promise<void> {
-  await sleep(LATENCY_MS / 2);
   const studentsFile = readDb<StudentsFile>("students");
   const parentsFile = readDb<ParentsFile>("parents");
   const idx = studentsFile.students.findIndex((s) => s.id === studentId);
@@ -1049,7 +1036,6 @@ export async function addTeacherRecord(payload: {
   password: string;
   assignments: { lessonId: string; gradeId: string; classId: string }[];
 }): Promise<{ teacher: Teacher }> {
-  await sleep(LATENCY_MS / 2);
   const teachersFile = readDb<TeachersFile>("teachers");
   const exists = teachersFile.teachers.find((t) => t.username.toLowerCase() === payload.username.toLowerCase());
   if (exists) throw new Error("نام کاربری دبیر قبلاً وجود دارد");
@@ -1077,7 +1063,6 @@ export async function updateTeacherRecord(teacherId: string, payload: {
   password?: string;
   assignments?: { lessonId: string; gradeId: string; classId: string }[];
 }): Promise<void> {
-  await sleep(LATENCY_MS / 2);
   const teachersFile = readDb<TeachersFile>("teachers");
   const idx = teachersFile.teachers.findIndex((t) => t.id === teacherId);
   if (idx === -1) throw new Error("دبیر یافت نشد");
@@ -1128,7 +1113,6 @@ export interface TeacherHomeData {
 }
 
 export async function teacherHome(teacherId: string): Promise<TeacherHomeData> {
-  await sleep(LATENCY_MS);
   const teacher = readDb<TeachersFile>("teachers").teachers.find((t) => t.id === teacherId);
   const students = readDb<StudentsFile>("students");
   const grades = readDb<GradesFile>("grades");

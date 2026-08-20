@@ -131,34 +131,15 @@ function key(file: DbFile): string {
 }
 
 function serverUrl(): string {
-  // default server host for file-backed DB
-  return (typeof window !== 'undefined' && window.location && `${window.location.protocol}//${window.location.hostname}:3001`) || 'http://localhost:3001';
+  return '';
 }
 
-function syncHttpGet(path: string): string | null {
-  try {
-    if (typeof XMLHttpRequest === 'undefined') return null;
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', path, false); // synchronous
-    xhr.send(null);
-    if (xhr.status === 200) return xhr.responseText;
-    return null;
-  } catch {
-    return null;
-  }
+function syncHttpGet(_path: string): string | null {
+  return null;
 }
 
-function syncHttpPost(path: string, body: string): boolean {
-  try {
-    if (typeof XMLHttpRequest === 'undefined') return false;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', path, false); // synchronous
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send(body);
-    return xhr.status === 200;
-  } catch {
-    return false;
-  }
+function syncHttpPost(_path: string, _body: string): boolean {
+  return false;
 }
 
 function readBackups(): BackupEntry[] {
@@ -203,10 +184,6 @@ function withLock<T>(task: () => T): T {
 /* ---------------- low level read / write ---------------- */
 
 function rawWrite(file: DbFile, serialized: string): void {
-  // Try file-backed server first (synchronous). Fall back to localStorage.
-  const url = `${serverUrl()}/db/${file}`;
-  const ok = syncHttpPost(url, serialized);
-  if (ok) return;
   const tmpKey = `${key(file)}${TMP_SUFFIX}`;
   localStorage.setItem(tmpKey, serialized);
   localStorage.setItem(key(file), serialized);
@@ -216,12 +193,7 @@ function rawWrite(file: DbFile, serialized: string): void {
 /** Read a collection; recovers from corruption using backups. */
 export function readDb<T extends DbCollections[keyof DbCollections]>(file: DbFile): T {
   return withLock(() => {
-    // Try file-backed server synchronously
-    let raw: string | null = null;
-    const url = `${serverUrl()}/db/${file}`;
-    raw = syncHttpGet(url);
-    // If server didn't return, fall back to localStorage
-    if (raw === null) raw = localStorage.getItem(key(file));
+    let raw: string | null = localStorage.getItem(key(file));
     if (raw !== null) {
       try {
         const parsed = JSON.parse(raw) as T;

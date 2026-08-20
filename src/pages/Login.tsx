@@ -1,4 +1,4 @@
-import { AlertTriangle, BrainCircuit, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
+import { AlertTriangle, BrainCircuit, CheckCircle, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ interface LoginForm {
 export default function Login() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const {
     register,
     handleSubmit,
@@ -29,12 +30,32 @@ export default function Login() {
       notify.error(res.error ?? "ورود ناموفق بود");
       return;
     }
+    setShowSuccess(true);
     notify.success(`خوش آمدید، ${res.user?.name}`);
-    navigate("/dashboard");
+    setTimeout(() => {
+      window.location.reload();
+    }, 5000);
   });
 
   return (
     <div className="flex min-h-screen">
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <div className="relative flex h-24 w-24 items-center justify-center">
+              <div className="absolute h-full w-full animate-ping rounded-full bg-green-500/30" />
+              <div className="absolute h-20 w-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-500/30" />
+              <CheckCircle size={40} className="relative z-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-green-400">ورود موفق!</h2>
+            <p className="text-sm text-slate-300">در حال Refresh کردن صفحه...</p>
+            <div className="mt-4 h-1 w-64 overflow-hidden rounded-full bg-slate-700">
+              <div className="h-full w-full animate-loading-bar bg-gradient-to-r from-green-400 to-emerald-500" />
+            </div>
+            <p className="mt-2 text-xs text-slate-400">5 ثانیه باقی مانده</p>
+          </div>
+        </div>
+      )}
       {/* form side */}
       <div className="flex w-full flex-col justify-center px-6 py-10 lg:w-[55%] lg:px-16">
         <div className="mx-auto w-full max-w-md">
@@ -44,13 +65,13 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-slate-50">سامانه هوشمند مدارس (SIP)</h1>
-              <p className="text-[12px] text-slate-400">تحلیل، پیش‌بینی و تصمیم‌یار هوشمند آموزشی</p>
+              <p className="text-[12px] text-slate-400">تحلیل، پیشبینی و تصمیمیار هوشمند آموزشی</p>
             </div>
           </div>
 
           <div className="card-surface p-6 anim-fade-up">
             <h2 className="mb-1 text-[15px] font-semibold text-slate-100">ورود به سامانه</h2>
-            <p className="mb-5 text-[12px] text-slate-500">نقش شما به‌صورت خودکار تشخیص داده می‌شود.</p>
+            <p className="mb-5 text-[12px] text-slate-500">نقش شما بهصورت خودکار تشخیص داده میشود.</p>
             <form onSubmit={onSubmit} className="space-y-4">
               <Field label="نام کاربری" error={errors.username ? "الزامی" : undefined}>
                 <div className="relative">
@@ -82,9 +103,9 @@ export default function Login() {
             افت تحصیلی را <span className="text-blue-400">قبل از کارنامه</span> بشناسید
           </h2>
           <ul className="space-y-5">
-            <Feature icon={<AlertTriangle size={18} />} title="هشدار زودهنگام (Risk Score)" desc="امتیاز ریسک ۰ تا ۰۰ برای هر دانش‌آموز بر اساس نمرات، غیبت، تکالیف، رفتار و سلامت روان — با هشدار خودکار به مشاور، مدیر و والدین." />
-            <Feature icon={<LineChart size={18} />} title="پیش‌بینی نمرات و روند" desc="برآورد نمره آزمون بعدی، میانگین ترم و احتمال قبولی/افت برای هر درس با درصد اطمینان." />
-            <Feature icon={<TrendingDown size={18} />} title="برنامه مطالعاتی هوشمند" desc="برنامه هفتگی شخصی‌سازی‌شده بر اساس نقاط ضعف، اهمیت درس و روند یادگیری." />
+            <Feature icon={<AlertTriangle size={18} />} title="هشدار زودهنگام (Risk Score)" desc="امتیاز ریسک ۰ تا ۰۰ برای هر دانشآموز بر اساس نمرات، غیبت، تکالیف، رفتار و سلامت روان — با هشدار خودکار به مشاور، مدیر و والدین." />
+            <Feature icon={<LineChart size={18} />} title="پیشبینی نمرات و روند" desc="برآورد نمره آزمون بعدی، میانگین ترم و احتمال قبولی/افت برای هر درس با درصد اطمینان." />
+            <Feature icon={<TrendingDown size={18} />} title="برنامه مطالعاتی هوشمند" desc="برنامه هفتگی شخصیسازیشده بر اساس نقاط ضعف، اهمیت درس و روند یادگیری." />
             <Feature icon={<ShieldCheck size={18} />} title="تحلیل سلامت روان هفتگی" desc="فرم ۸ سؤالی هفتگی، شاخص استرس، اضطراب، انگیزه و احتمال ترک تحصیل." />
           </ul>
         </div>

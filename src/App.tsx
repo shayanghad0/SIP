@@ -1,6 +1,6 @@
 import { BrainCircuit } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
-import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes, useParams, useLocation } from "react-router-dom";
 import { ToasterSetup } from "./components/ui";
 import { SessionProvider, useSession } from "./lib/session";
 import type { Role } from "./lib/types";
@@ -12,6 +12,15 @@ import TeacherDashboard from "./pages/Teacher";
 import ConsultantDashboard from "./pages/Consultant";
 import ParentDashboard from "./pages/Parent";
 import StudentDashboard from "./pages/Student";
+
+function PageTransition({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  return (
+    <div key={location.pathname} className="animate-page-transition">
+      {children}
+    </div>
+  );
+}
 
 function BootScreen() {
   return (
@@ -79,13 +88,6 @@ function DashboardRoute() {
 }
 
 function AppInner() {
-  const { refresh } = useSession();
-  useEffect(() => {
-    const on = () => void refresh();
-    window.addEventListener("focus", on);
-    return () => window.removeEventListener("focus", on);
-  }, [refresh]);
-
   return (
     <HashRouter>
       <Routes>
