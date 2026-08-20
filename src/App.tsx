@@ -22,13 +22,21 @@ function PageTransition({ children }: { children: ReactNode }) {
   );
 }
 
+function SectionTransition({ children }: { children: ReactNode }) {
+  return (
+    <div className="animate-section-transition">
+      {children}
+    </div>
+  );
+}
+
 function BootScreen() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 animate-fade-in">
       <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-600/30">
         <BrainCircuit size={28} className="text-white" />
       </div>
-      <p className="text-[13px] text-slate-400">در حال بارگذاری سامانه هوشمند مدارس…</p>
+      <p className="text-[13px] text-slate-400">در حال بارگذاری سامانه هوشمند مدارس...</p>
     </div>
   );
 }
@@ -64,15 +72,15 @@ function roleDashboard(role: Role, section: string | undefined): ReactNode {
   const sec = section ?? "overview";
   switch (role) {
     case "admin":
-      return <AdminDashboard section={sec} />;
+      return <SectionTransition><AdminDashboard section={sec} /></SectionTransition>;
     case "teacher":
-      return <TeacherDashboard section={sec} />;
+      return <SectionTransition><TeacherDashboard section={sec} /></SectionTransition>;
     case "consultant":
-      return <ConsultantDashboard section={sec} />;
+      return <SectionTransition><ConsultantDashboard section={sec} /></SectionTransition>;
     case "parent":
-      return <ParentDashboard section={sec} />;
+      return <SectionTransition><ParentDashboard section={sec} /></SectionTransition>;
     case "student":
-      return <StudentDashboard section={sec} />;
+      return <SectionTransition><StudentDashboard section={sec} /></SectionTransition>;
     default:
       return <Navigate to="/login" replace />;
   }
@@ -90,16 +98,18 @@ function DashboardRoute() {
 function AppInner() {
   return (
     <HashRouter>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/install" element={<InstallRoute />} />
-        <Route path="/login" element={<LoginRoute />} />
-        <Route path="/dashboard" element={<DashboardRoute />} />
-        <Route path="/dashboard/:section" element={<DashboardRoute />} />
-        <Route path="/forbidden" element={<Forbidden />} />
-        <Route path="/error" element={<ServerError />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <PageTransition>
+        <Routes>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/install" element={<InstallRoute />} />
+          <Route path="/login" element={<LoginRoute />} />
+          <Route path="/dashboard" element={<DashboardRoute />} />
+          <Route path="/dashboard/:section" element={<DashboardRoute />} />
+          <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="/error" element={<ServerError />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
     </HashRouter>
   );
 }

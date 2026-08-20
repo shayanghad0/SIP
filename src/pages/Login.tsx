@@ -39,8 +39,8 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen">
-      {showSuccess && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+       {showSuccess && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-transition">
           <div className="mb-8 flex flex-col items-center gap-4">
             <div className="relative flex h-24 w-24 items-center justify-center">
               <div className="absolute h-full w-full animate-ping rounded-full bg-green-500/30" />

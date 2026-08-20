@@ -169,3 +169,47 @@ input[type="range"] {
 .animate-loading-bar {
   animation: loading-bar 5s linear forwards;
 }
+
+@keyframes page-transition {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-transition-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes section-transition {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-page-transition {
+  animation: page-transition 0.3s ease-out forwards;
+}
+
+.animate-section-transition {
+  animation: section-transition 0.2s ease-out forwards;
+}
+
+/* Fade transition for modals and overlays */
+.animate-fade-transition {
+  animation: page-transition-fade 0.2s ease-out forwards;
+}
