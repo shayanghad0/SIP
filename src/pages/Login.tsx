@@ -1,6 +1,6 @@
 import { AlertTriangle, BrainCircuit, CheckCircle, LineChart, Lock, ShieldCheck, TrendingDown, User } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext, FormProvider } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { login } from "../lib/api";
 import { faDate } from "../lib/format";
@@ -15,12 +15,8 @@ export default function Login() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<LoginForm>({ defaultValues: { username: "", password: "" } });
+  const formMethods = useForm<LoginForm>({ defaultValues: { username: "", password: "" } });
+  const { register, handleSubmit, formState: { errors } } = formMethods;
 
   const onSubmit = handleSubmit(async (v) => {
     setBusy(true);
@@ -72,6 +68,7 @@ export default function Login() {
           <div className="card-surface p-6 anim-fade-up">
             <h2 className="mb-1 text-[15px] font-semibold text-slate-100">ورود به سامانه</h2>
             <p className="mb-5 text-[12px] text-slate-500">نقش شما بهصورت خودکار تشخیص داده میشود.</p>
+            <FormProvider {...formMethods}>
             <form onSubmit={onSubmit} className="space-y-4">
               <Field label="نام کاربری" error={errors.username ? "الزامی" : undefined}>
                 <div className="relative">
@@ -80,15 +77,13 @@ export default function Login() {
                 </div>
               </Field>
               <Field label="رمز عبور" error={errors.password ? "الزامی" : undefined}>
-                <div className="relative">
-                  <Lock size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <Input dir="ltr" type="password" className="pr-10" placeholder="••••••••" {...register("password", { required: true })} />
-                </div>
+                <PasswordToggle />
               </Field>
               <Button type="submit" loading={busy} className="w-full py-3">
                 ورود به داشبورد
               </Button>
             </form>
+            </FormProvider>
           </div>
           <p className="mt-4 text-center text-[11px] text-slate-600">{faDate(new Date().toISOString())} — نسخه نمایشی SIP</p>
         </div>
@@ -114,10 +109,50 @@ export default function Login() {
   );
 }
 
-function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+function PasswordToggle() {
+  const [show, setShow] = useState(false);
+  const { register } = useFormContext<LoginForm>();
+  const { onChange, onBlur, name, ref } = register("password", { required: true });
   return (
-    <li className="flex gap-3.5">
-      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-300">{icon}</div>
+    <div className="relative">
+      <Lock size={15} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+      <Input
+        dir="ltr"
+        type={show ? "text" : "password"}
+        className="pr-10 pl-9"
+        placeholder="••••••••"
+        name={name}
+        onChange={onChange}
+        onBlur={onBlur}
+        ref={ref}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+      >
+        {show ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
+function Feature({ icon, title, desc, delay }: { icon: React.ReactNode; title: string; desc: string; delay: number }) {
+  return (
+    <li className="flex gap-3.5 animate-fade-in-up" style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}>
+      <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/25 bg-blue-500/10 text-blue-300 transition-transform duration-300 hover:scale-110 hover:border-blue-400/50 hover:bg-blue-500/20">{icon}</div>
       <div>
         <p className="text-[14px] font-semibold text-slate-100">{title}</p>
         <p className="mt-1 text-[12px] leading-6 text-slate-400">{desc}</p>
