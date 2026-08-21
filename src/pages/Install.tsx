@@ -1,4 +1,4 @@
-import { BookOpen, BrainCircuit, Check, ChevronLeft, ChevronRight, GraduationCap, KeyRound, Plus, ShieldCheck, Trash2, Users, UserPlus } from "lucide-react";
+import { BookOpen, BrainCircuit, Check, ChevronLeft, ChevronRight, GraduationCap, HelpCircle, KeyRound, Plus, ShieldCheck, Trash2, Users, UserPlus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -70,6 +70,57 @@ const STEPS = [
   ) },
 ];
 
+const STEP_GUIDES: Record<string, { title: string; what: string; why: string; how: string[] }> = {
+  admin: {
+    title: "ایجاد حساب مدیر",
+    what: "در این مرحله حساب مدیر کل سامانه را می‌سازید. مدیر بالاترین سطح دسترسی را دارد و می‌تواند تمام بخش‌های سامانه را مدیریت کند.",
+    why: "بدون حساب مدیر، سامانه قابل استفاده نیست. مدیر مسئول ایجاد پایه‌ها، کلاس‌ها، دروس و سایر کاربران است.",
+    how: ["نام مدرسه را وارد کنید", "نام و نام خانوادگی خود را به‌عنوان مدیر وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید (مثلاً: admin)", "رمز عبور قوی با حداقل ۶ کاراکتر وارد کنید", "رمز عبور را دوباره تایید کنید", "روی دکمه «ثبت مدیر» کلیک کنید"],
+  },
+  grades: {
+    title: "پایه‌های تحصیلی",
+    what: "پایه‌های تحصیلی مدرسه را تعریف می‌کنید. مثلاً: پایه هفتم، پایه هشتم، پایه نهم.",
+    why: "هر دانش‌آموز باید به یک پایه اختصاص داده شود. پایه‌ها برای دسته‌بندی کلاس‌ها و تحلیل عملکرد استفاده می‌شوند.",
+    how: ["حداقل ۲ پایه اضافه کنید", "از دکمه‌های سریع (+ پایه ۱، + پایه ۲ و...) استفاده کنید یا نام دلخواه تایپ کنید", "برای حذف پایه، آیکون سطل زباله را بزنید", "نام پایه‌ها می‌تواند به‌صورت «هفتم»، «هشتم» یا «پایه ۱»، «پایه ۲» باشد"],
+  },
+  classes: {
+    title: "کلاس‌های هر پایه",
+    what: "برای هر پایه تحصیلی، کلاس‌های مربوطه را تعریف می‌کنید. مثلاً: پایه هفتم — کلاس ۱، کلاس ۲، کلاس ۳.",
+    why: "دانش‌آموزان در کلاس‌ها دسته‌بندی می‌شوند. دبیران به کلاس‌های خاصی اختصاص داده می‌شوند و حضور و غیاب بر اساس کلاس ثبت می‌شود.",
+    how: ["برای هر پایه حداقل یک کلاس اضافه کنید", "نام کلاس‌ها را ویرایش کنید (مثلاً: کلاس ۱ را به «الف» تغییر دهید)", "با دکمه «افزودن کلاس» کلاس جدید اضافه کنید", "برای حذف کلاس، آیکون سطل زباله را بزنید"],
+  },
+  lessons: {
+    title: "دروس تحصیلی",
+    what: "دروسی که در مدرسه تدریس می‌شوند را اضافه می‌کنید و برای هر درس یک امتیاز اهمیت (۳ تا ۱۰) تعیین می‌کنید.",
+    why: "دروس برای اختصاص دبیران به کلاس‌ها، ثبت نمرات و محاسبه ریسک دانش‌آموزان استفاده می‌شوند. امتیاز اهمیت در محاسبه ریسک و برنامه مطالعاتی نقش دارد.",
+    how: ["از دروس پیش‌فرض (ریاضی، فیزیک، شیمی و...) استفاده کنید یا درس جدید اضافه کنید", "برای هر درس امتیاز اهمیت را با نوار لغزنده تنظیم کنید (۱۰ = بیشترین اهمیت)", "این مرحله اختیاری است — می‌توانید بعداً از بخش تنظیمات دروس را اضافه کنید"],
+  },
+  consultant: {
+    title: "حساب مشاور",
+    what: "یک یا چند حساب برای مشاوران مدرسه ایجاد می‌کنید.",
+    why: "مشاوران دانش‌آموزان پرخطر را پایش می‌کنند، فرم‌های سلامت روان را بررسی می‌کنند و گزارش مشاوره ثبت می‌کنند. دسترسی مشاور فقط به دانش‌آموزان پرخطر است.",
+    how: ["نام و نام خانوادگی مشاور را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور اضافه کنید", "حداقل یک مشاور الزامی است"],
+  },
+  students: {
+    title: "دانش‌آموزان",
+    what: "دانش‌آموزان مدرسه را یکی‌یکی اضافه می‌کنید و هر کدام را به یک پایه و کلاس اختصاص می‌دهید.",
+    why: "برای هر دانش‌آموز به‌صورت خودکار حساب والدین نیز ساخته می‌شود. دانش‌آموزان واحد اصلی سامانه هستند — نمرات، حضور و غیاب، تکالیف و تحلیل ریسک برای آن‌ها ثبت می‌شود.",
+    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور را وارد کنید", "پایه و کلاس مربوطه را انتخاب کنید", "اطلاعات اختیاری (کد ملی، نام پدر و مادر، تلفن) را پر کنید", "برای تولید رمز تصادفی روی «رمز تصادفی» کلیک کنید", "حداقل یک دانش‌آموز الزامی است"],
+  },
+  teachers: {
+    title: "دبیران",
+    what: "دبیران مدرسه را اضافه می‌کنید و برای هر دبیر مشخص می‌کنید چه درسی را در چه کلاس‌هایی تدریس می‌کند.",
+    why: "دبیران حضور و غیاب، نمرات و گزارش‌های رفتاری دانش‌آموزان کلاس‌های خود را ثبت می‌کنند. اختصاص درس به دبیر برای تحلیل عملکرد کارآموزی دبیران ضروری است.",
+    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور دبیر را وارد کنید", "درس، پایه و کلاس مربوطه را انتخاب کنید و روی «افزودن تدریس» بزنید", "هر دبیر می‌تواند چندین درس در چندین کلاس تدریس کند", "حداقل یک دبیر الزامی است"],
+  },
+  finish: {
+    title: "کدهای دسترسی",
+    what: "در این مرحله نصب تکمیل می‌شود. سامانه کدهای دسترسی منحصر به فرد برای تمام کاربران تولید می‌کند.",
+    why: "هر کاربر برای ورود به سامانه به کد دسترسی نیاز دارد. این کدها در فایل‌های JSON ذخیره می‌شوند و برای ورود استفاده می‌شوند.",
+    how: ["گزینه «درج داده‌های نمونه» را فعال کنید تا داشبوردها با داده‌های تستی نمایش داده شوند", "روی «پایان نصب و تولید کدها» کلیک کنید", "کدهای تولید شده را برای هر کاربر ذخیره کنید", "روی «ورود به سامانه» بزنید تا وارد شوید"],
+  },
+};
+
 interface AdminForm {
   fullName: string;
   username: string;
@@ -96,6 +147,7 @@ export default function InstallWizard() {
   const [loadDemo, setLoadDemo] = useState(true);
   const [busy, setBusy] = useState(false);
   const [records, setRecords] = useState<AccessRecord[] | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
 
   const navigate = useNavigate();
 
@@ -162,6 +214,18 @@ export default function InstallWizard() {
           <h1 className="text-lg font-bold text-slate-50">نصب سامانه هوشمند مدارس (SIP)</h1>
           <p className="text-[12px] text-slate-400">{schoolName} — پیکربندی اولیه در ۸ مرحله</p>
         </div>
+        <button
+          onClick={() => setShowGuide((g) => !g)}
+          className={cn(
+            "mr-auto flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium transition",
+            showGuide
+              ? "border-blue-500/50 bg-blue-600/20 text-blue-300"
+              : "border-slate-700/60 bg-white/5 text-slate-400 hover:border-blue-500/40 hover:text-blue-300"
+          )}
+        >
+          <HelpCircle size={14} />
+          راهنما
+        </button>
       </div>
 
       {/* stepper */}
@@ -189,6 +253,41 @@ export default function InstallWizard() {
           </div>
         ))}
       </div>
+
+      {/* guide panel */}
+      {showGuide && (
+        <div className="mb-6 rounded-2xl border border-blue-500/25 bg-blue-500/5 p-5 anim-fade-up">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/15">
+                <HelpCircle size={15} className="text-blue-400" />
+              </div>
+              <h3 className="text-[14px] font-semibold text-blue-200">{STEP_GUIDES[STEPS[step].key].title}</h3>
+            </div>
+            <button onClick={() => setShowGuide(false)} className="rounded-lg p-1 text-slate-500 hover:text-slate-300 cursor-pointer">
+              <X size={15} />
+            </button>
+          </div>
+          <div className="space-y-3 text-[12px] leading-6">
+            <div>
+              <span className="mb-1 block font-semibold text-blue-300">این مرحله چیست؟</span>
+              <p className="text-slate-400">{STEP_GUIDES[STEPS[step].key].what}</p>
+            </div>
+            <div>
+              <span className="mb-1 block font-semibold text-blue-300">چرا ضروری است؟</span>
+              <p className="text-slate-400">{STEP_GUIDES[STEPS[step].key].why}</p>
+            </div>
+            <div>
+              <span className="mb-1 block font-semibold text-blue-300">چگونه انجام دهیم؟</span>
+              <ol className="mr-4 list-decimal space-y-1 text-slate-400">
+                {STEP_GUIDES[STEPS[step].key].how.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card-surface p-6 anim-fade-up" key={step}>
         {step === 0 && <StepAdmin schoolName={schoolName} setSchoolName={setSchoolName} onDone={setAdmin} />}
