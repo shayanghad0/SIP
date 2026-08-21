@@ -1,5 +1,6 @@
-import { BrainCircuit, LogOut, Menu, X, type LucideIcon } from "lucide-react";
+import { BrainCircuit, LogOut, Menu, User, X, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "../utils/cn";
 import { faDate } from "../lib/format";
 import { roleLabel } from "../lib/api";
@@ -23,6 +24,7 @@ interface AppShellProps {
 
 export function AppShell({ role, userName, nav, section, onNavigate, onLogout, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
   const active = nav.find((n) => n.key === section);
 
   const sidebar = (
@@ -58,13 +60,17 @@ export function AppShell({ role, userName, nav, section, onNavigate, onLogout, c
       </nav>
       <div className="border-t border-slate-800/80 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 text-[12px] font-bold text-slate-200">
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 text-[12px] font-bold text-slate-200 transition-all hover:from-blue-500/20 hover:to-blue-700/20 hover:border-blue-500/30 cursor-pointer"
+            title="پروفایل"
+          >
             {userName.slice(0, 1)}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-slate-200">{userName}</p>
+          </button>
+          <button onClick={() => navigate("/profile")} className="min-w-0 flex-1 cursor-pointer text-left">
+            <p className="truncate text-[13px] font-medium text-slate-200 hover:text-blue-300 transition-colors">{userName}</p>
             <p className="text-[11px] text-slate-500">{roleLabel(role)}</p>
-          </div>
+          </button>
           <button onClick={onLogout} title="خروج" className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-500/15 hover:text-rose-400 cursor-pointer">
             <LogOut size={16} />
           </button>

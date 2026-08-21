@@ -12,6 +12,7 @@ import TeacherDashboard from "./pages/Teacher";
 import ConsultantDashboard from "./pages/Consultant";
 import ParentDashboard from "./pages/Parent";
 import StudentDashboard from "./pages/Student";
+import Profile from "./pages/Profile";
 
 function PageTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -105,6 +106,7 @@ function AppInner() {
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/dashboard/:section" element={<DashboardRoute />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/forbidden" element={<Forbidden />} />
           <Route path="/error" element={<ServerError />} />
           <Route path="*" element={<NotFound />} />

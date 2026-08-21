@@ -10,10 +10,14 @@
 import {
   attemptLogin,
   clearToken,
+  findUserByUsername,
   generateAccessCode,
   generatePassword,
   hashPassword,
   readToken,
+  signToken,
+  storeToken,
+  verifyPassword,
   verifyToken,
   type TokenPayload,
 } from "./auth";
@@ -1508,4 +1512,102 @@ export function behaviorOf(studentId: string): { id: string; date: string; type:
 
 export function allExams(): Exam[] {
   return readDb<GradesFile>("grades").exams;
+}
+
+/* ================= profile ================= */
+
+export async function updateProfile(
+  userId: string,
+  role: Role,
+  currentPassword: string,
+  newUsername?: string,
+  newPassword?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const user = findUserByUsername("");
+  // Verify current password
+  const pools: { file: DbFile; collection: string }[] = [
+    { file: "admin", collection: "admins" },
+    { file: "teachers", collection: "teachers" },
+    { file: "students", collection: "students" },
+    { file: "parents", collection: "parents" },
+    { file: "consultants", collection: "consultants" },
+  ];
+  let found = false;
+  for (const pool of pools) {
+    const data = readDb<any>(pool.file);
+    const arr = data[pool.collection];
+    const record = arr?.find((r: any) => r.id === userId);
+    if (record) {
+      found = true;
+      const ok = await verifyPassword(currentPassword, record.salt, record.passwordHash);
+      if (!ok) return { ok: false, error: "رمز عبور فعلی نادرست است" };
+
+      // Check username uniqueness
+      if (newUsername && newUsername.trim() !== record.username) {
+        const allUsers = [
+          ...readDb<AdminFile>("admin").admins,
+          ...readDb<TeachersFile>("teachers").teachers,
+          ...readDb<StudentsFile>("students").students,
+          ...readDb<ParentsFile>("parents").parents,
+          ...readDb<ConsultantsFile>("consultants").consultants,
+        ];
+        const exists = allUsers.some((u) => u.username.toLowerCase() === newUsername.trim().toLowerCase() && u.id !== userId);
+        if (exists) return { ok: false, error: "این نام کاربری قبلاً استفاده شده است" };
+      }
+
+      // Update
+      if (newUsername) record.username = newUsername.trim();
+      if (newPassword) {
+        const { hash, salt } = await hashPassword(newPassword);
+        record.passwordHash = hash;
+        record.salt = salt;
+      }
+      writeDb(pool.file, data);
+      break;
+    }
+  }
+  if (!found) return { ok: false, error: "کاربر یافت نشد" };
+
+  // Re-sign token if username changed
+  if (newUsername) {
+    const u = findUserByUsername(newUsername);
+    if (u) {
+      const token = await signToken({ sub: u.id, role: u.role, name: u.name });
+      storeToken(token);
+    }
+  }
+
+  return { ok: true };
+}
+
+export function getUsernameById(userId: string): string {
+  const pools: { file: DbFile; collection: string }[] = [
+    { file: "admin", collection: "admins" },
+    { file: "teachers", collection: "teachers" },
+    { file: "students", collection: "students" },
+    { file: "parents", collection: "parents" },
+    { file: "consultants", collection: "consultants" },
+  ];
+  for (const pool of pools) {
+    const data = readDb<any>(pool.file);
+    const record = data[pool.collection]?.find((r: any) => r.id === userId);
+    if (record) return record.username;
+  }
+  return "";
+}
+
+export function getAccessCodeById(userId: string): string {
+  const pools: { file: DbFile; collection: string }[] = [
+    { file: "admin", collection: "admins" },
+    { file: "teachers", collection: "teachers" },
+    { file: "students", collection: "students" },
+    { file: "parents", collection: "parents" },
+    { file: "consultants", collection: "consultants" },
+  ];
+  for (const pool of pools) {
+    const data = readDb<any>(pool.file);
+    const record = data[pool.collection]?.find((r: any) => r.id === userId);
+    if (record) return record.accessCode;
+  }
+  return "";
 }
