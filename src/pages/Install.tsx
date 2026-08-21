@@ -10,14 +10,64 @@ import { Badge, Button, Field, Input, notify, Select } from "../components/ui";
 import { cn } from "../utils/cn";
 
 const STEPS = [
-  { key: "admin", label: "مدیر" },
-  { key: "grades", label: "پایه‌ها" },
-  { key: "classes", label: "کلاس‌ها" },
-  { key: "lessons", label: "دروس" },
-  { key: "consultant", label: "مشاور" },
-  { key: "students", label: "دانش‌آموزان" },
-  { key: "teachers", label: "دبیران" },
-  { key: "finish", label: "کدهای دسترسی" },
+  { key: "admin", label: "مدیر", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" />
+      <path d="M6 10h12l1 10H5L6 10z" />
+      <circle cx="12" cy="6" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  ) },
+  { key: "grades", label: "پایه‌ها", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <rect x="3" y="4" width="18" height="5" rx="1.5" />
+      <rect x="5" y="10" width="14" height="5" rx="1.5" />
+      <rect x="7" y="16" width="10" height="4" rx="1.5" />
+    </svg>
+  ) },
+  { key: "classes", label: "کلاس‌ها", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <rect x="2" y="2" width="9" height="9" rx="2" />
+      <rect x="13" y="2" width="9" height="9" rx="2" />
+      <rect x="2" y="13" width="9" height="9" rx="2" />
+      <rect x="13" y="13" width="9" height="9" rx="2" />
+    </svg>
+  ) },
+  { key: "lessons", label: "دروس", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      <line x1="9" y1="7" x2="16" y2="7" />
+      <line x1="9" y1="11" x2="14" y2="11" />
+    </svg>
+  ) },
+  { key: "consultant", label: "مشاور", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+      <circle cx="12" cy="12" r="3" strokeWidth="1.2" />
+    </svg>
+  ) },
+  { key: "students", label: "دانش‌آموزان", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ) },
+  { key: "teachers", label: "دبیران", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+      <path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5" />
+    </svg>
+  ) },
+  { key: "finish", label: "کدهای دسترسی", icon: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
+      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78z" />
+      <path d="M13.5 13.5L17 17" />
+      <path d="M15 7l2 2" />
+      <path d="M7 17l3-3" />
+    </svg>
+  ) },
 ];
 
 interface AdminForm {
@@ -130,8 +180,8 @@ export default function InstallWizard() {
                     : "border-slate-700/60 bg-white/5 text-slate-500",
               )}
             >
-              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold", i === step ? "bg-blue-600 text-white" : i < step ? "bg-emerald-500/20" : "bg-slate-700/50")}>
-                {i < step ? <Check size={11} /> : faNum(i + 1)}
+              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full", i === step ? "bg-blue-600 text-white" : i < step ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-700/50 text-slate-500")}>
+                {i < step ? <Check size={11} /> : s.icon}
               </span>
               {s.label}
             </button>
