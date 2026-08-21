@@ -1,4 +1,4 @@
-import { BookOpen, BrainCircuit, Check, ChevronLeft, ChevronRight, GraduationCap, HelpCircle, KeyRound, Plus, ShieldCheck, Trash2, Users, UserPlus, X } from "lucide-react";
+import { BookOpen, BrainCircuit, Check, ChevronLeft, ChevronRight, Download, GraduationCap, HelpCircle, KeyRound, Plus, ShieldCheck, Trash2, Users, UserPlus, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +40,7 @@ const STEPS = [
       <line x1="9" y1="11" x2="14" y2="11" />
     </svg>
   ) },
-  { key: "consultant", label: "مشاور", icon: (
+  { key: "consultant", label: "مشاور و ناظم", icon: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
       <circle cx="12" cy="12" r="3" strokeWidth="1.2" />
@@ -61,12 +61,18 @@ const STEPS = [
     </svg>
   ) },
   { key: "finish", label: "کدهای دسترسی", icon: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
-      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78z" />
-      <path d="M13.5 13.5L17 17" />
-      <path d="M15 7l2 2" />
-      <path d="M7 17l3-3" />
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round">
+    <path d="M12 3v11"/>
+    <path d="M7 10l5 5 5-5"/>
+    <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+</svg>
+
   ) },
 ];
 
@@ -96,28 +102,28 @@ const STEP_GUIDES: Record<string, { title: string; what: string; why: string; ho
     how: ["از دروس پیش‌فرض (ریاضی، فیزیک، شیمی و...) استفاده کنید یا درس جدید اضافه کنید", "برای هر درس امتیاز اهمیت را با نوار لغزنده تنظیم کنید (۱۰ = بیشترین اهمیت)", "این مرحله اختیاری است — می‌توانید بعداً از بخش تنظیمات دروس را اضافه کنید"],
   },
   consultant: {
-    title: "حساب مشاور",
-    what: "یک یا چند حساب برای مشاوران مدرسه ایجاد می‌کنید.",
-    why: "مشاوران دانش‌آموزان پرخطر را پایش می‌کنند، فرم‌های سلامت روان را بررسی می‌کنند و گزارش مشاوره ثبت می‌کنند. دسترسی مشاور فقط به دانش‌آموزان پرخطر است.",
-    how: ["نام و نام خانوادگی مشاور را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور اضافه کنید", "حداقل یک مشاور الزامی است"],
+    title: "حساب مشاور و ناظم",
+    what: "یک یا چند حساب برای مشاوران و ناظمان مدرسه ایجاد می‌کنید.",
+    why: "مشاوران و ناظمان دانش‌آموزان پرخطر را پایش می‌کنند، فرم‌های سلامت روان را بررسی می‌کنند و گزارش مشاوره ثبت می‌کنند. دسترسی آن‌ها فقط به دانش‌آموزان پرخطر است.",
+    how: ["نام و نام خانوادگی مشاور/ناظم را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور/ناظم اضافه کنید", "حداقل یک مشاور الزامی است"],
   },
   students: {
     title: "دانش‌آموزان",
-    what: "دانش‌آموزان مدرسه را یکی‌یکی اضافه می‌کنید و هر کدام را به یک پایه و کلاس اختصاص می‌دهید.",
-    why: "برای هر دانش‌آموز به‌صورت خودکار حساب والدین نیز ساخته می‌شود. دانش‌آموزان واحد اصلی سامانه هستند — نمرات، حضور و غیاب، تکالیف و تحلیل ریسک برای آن‌ها ثبت می‌شود.",
-    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور را وارد کنید", "پایه و کلاس مربوطه را انتخاب کنید", "اطلاعات اختیاری (کد ملی، نام پدر و مادر، تلفن) را پر کنید", "برای تولید رمز تصادفی روی «رمز تصادفی» کلیک کنید", "حداقل یک دانش‌آموز الزامی است"],
+    what: "دانش‌آموزان مدرسه را یکی‌یکی اضافه می‌کنید و هر کدام را به یک پایه و کلاس اختصاص می‌دهید. این مرحله اختیاری است.",
+    why: "برای هر دانش‌آموز به‌صورت خودکار حساب والدین نیز ساخته می‌شود. دانش‌آموزان واحد اصلی سامانه هستند — نمرات، حضور و غیاب، تکالیف و تحلیل ریسک برای آن‌ها ثبت می‌شود. اگر فعلاً دانش‌آموزی ندارید، می‌توانید این مرحله را رد کنید.",
+    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور را وارد کنید", "پایه و کلاس مربوطه را انتخاب کنید", "اطلاعات اختیاری (کد ملی، نام پدر و مادر، تلفن) را پر کنید", "برای تولید رمز تصادفی روی «رمز تصادفی» کلیک کنید", "این مرحله اختیاری است — می‌توانید آن را رد کنید"],
   },
   teachers: {
     title: "دبیران",
-    what: "دبیران مدرسه را اضافه می‌کنید و برای هر دبیر مشخص می‌کنید چه درسی را در چه کلاس‌هایی تدریس می‌کند.",
-    why: "دبیران حضور و غیاب، نمرات و گزارش‌های رفتاری دانش‌آموزان کلاس‌های خود را ثبت می‌کنند. اختصاص درس به دبیر برای تحلیل عملکرد کارآموزی دبیران ضروری است.",
-    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور دبیر را وارد کنید", "درس، پایه و کلاس مربوطه را انتخاب کنید و روی «افزودن تدریس» بزنید", "هر دبیر می‌تواند چندین درس در چندین کلاس تدریس کند", "حداقل یک دبیر الزامی است"],
+    what: "دبیران مدرسه را اضافه می‌کنید و برای هر دبیر مشخص می‌کنید چه درسی را در چه کلاس‌هایی تدریس می‌کند. این مرحله اختیاری است.",
+    why: "دبیران حضور و غیاب، نمرات و گزارش‌های رفتاری دانش‌آموزان کلاس‌های خود را ثبت می‌کنند. اختصاص درس به دبیر برای تحلیل عملکرد کارآموزی دبیران ضروری است. اگر فعلاً دبیری ندارید، می‌توانید این مرحله را رد کنید.",
+    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور دبیر را وارد کنید", "درس، پایه و کلاس مربوطه را انتخاب کنید و روی «افزودن تدریس» بزنید", "هر دبیر می‌تواند چندین درس در چندین کلاس تدریس کند", "این مرحله اختیاری است — می‌توانید آن را رد کنید"],
   },
   finish: {
     title: "کدهای دسترسی",
     what: "در این مرحله نصب تکمیل می‌شود. سامانه کدهای دسترسی منحصر به فرد برای تمام کاربران تولید می‌کند.",
     why: "هر کاربر برای ورود به سامانه به کد دسترسی نیاز دارد. این کدها در فایل‌های JSON ذخیره می‌شوند و برای ورود استفاده می‌شوند.",
-    how: ["گزینه «درج داده‌های نمونه» را فعال کنید تا داشبوردها با داده‌های تستی نمایش داده شوند", "روی «پایان نصب و تولید کدها» کلیک کنید", "کدهای تولید شده را برای هر کاربر ذخیره کنید", "روی «ورود به سامانه» بزنید تا وارد شوید"],
+    how: ["روی «پایان نصب و تولید کدها» کلیک کنید", "کدهای تولید شده را برای هر کاربر ذخیره کنید", "روی «ورود به سامانه» بزنید تا وارد شوید", "دانش‌آموزان و دبیران اختیاری هستند — بعداً می‌توانید آن‌ها را اضافه کنید"],
   },
 };
 
@@ -134,6 +140,41 @@ interface EntryForm {
   password: string;
 }
 
+function PasswordInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        dir="ltr"
+        type={show ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="pl-9"
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+      >
+        {show ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
 export default function InstallWizard() {
   const [step, setStep] = useState(0);
   const [admin, setAdmin] = useState({ fullName: "", username: "", password: "" });
@@ -144,10 +185,10 @@ export default function InstallWizard() {
   const [consultants, setConsultants] = useState<{ fullName: string; username: string; password: string }[]>([]);
   const [students, setStudents] = useState<InstallStudent[]>([]);
   const [teachers, setTeachers] = useState<InstallTeacher[]>([]);
-  const [loadDemo, setLoadDemo] = useState(true);
   const [busy, setBusy] = useState(false);
   const [records, setRecords] = useState<AccessRecord[] | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const navigate = useNavigate();
 
@@ -161,6 +202,7 @@ export default function InstallWizard() {
     switch (step) {
       case 0:
         if (!admin.fullName.trim() || !admin.username.trim() || !admin.password) return notify.error("فیلدهای مدیر را کامل کنید");
+        if (admin.password.length < 6) return notify.error("رمز عبور باید حداقل ۶ کاراکتر باشد");
         return setStep(1);
       case 1:
         if (gradeNames.length < 2) return notify.error("حداقل ۲ پایه لازم است");
@@ -174,15 +216,13 @@ export default function InstallWizard() {
         if (lessons.some((l) => l.importance < 3)) return notify.error("حداقل اهمیت درس ۳ است");
         return setStep(4);
       case 4:
-        if (consultants.length < 1) return notify.error("حداقل یک مشاور ثبت کنید");
+        if (consultants.length < 1) return notify.error("حداقل یک مشاور/ناظم ثبت کنید");
         if (!uniqueUsernames()) return notify.error("نام کاربری تکراری وجود دارد");
         return setStep(5);
       case 5:
-        if (students.length < 1) return notify.error("حداقل یک دانش‌آموز ثبت کنید");
         if (!uniqueUsernames()) return notify.error("نام کاربری تکراری وجود دارد");
         return setStep(6);
       case 6:
-        if (teachers.length < 1) return notify.error("حداقل یک دبیر ثبت کنید");
         if (!uniqueUsernames()) return notify.error("نام کاربری تکراری وجود دارد");
         return setStep(7);
       default:
@@ -190,13 +230,31 @@ export default function InstallWizard() {
     }
   }
 
+  function downloadCSV(records: AccessRecord[]) {
+    const BOM = "\uFEFF";
+    const header = "ID,Full Name,Username,Password,Role";
+    const rows = records.map((r, i) => `${i + 1},"${r.name}","${r.username}","${r.password}","${r.roleLabel}"`);
+    const csv = BOM + header + "\n" + rows.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sip-access-codes-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function finish() {
     setBusy(true);
-    const payload: InstallPayload = { schoolName, admin, gradeNames, classNames, lessons, consultants, students, teachers, loadDemo };
+    const payload: InstallPayload = { schoolName, admin, gradeNames, classNames, lessons, consultants, students, teachers, loadDemo: false };
     try {
       const result = await install(payload);
       setRecords(result.records);
-      notify.success("نصب با موفقیت انجام شد");
+      downloadCSV(result.records);
+      setShowSuccess(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
     } catch {
       notify.error("خطا در نصب — دوباره تلاش کنید");
     } finally {
@@ -206,6 +264,23 @@ export default function InstallWizard() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-transition">
+          <div className="mb-8 flex flex-col items-center gap-4">
+            <div className="relative flex h-24 w-24 items-center justify-center">
+              <div className="absolute h-full w-full animate-ping rounded-full bg-green-500/30" />
+              <div className="absolute h-20 w-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-500/30" />
+              <CheckCircle size={40} className="relative z-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-green-400">نصب با موفقیت انجام شد!</h2>
+            <p className="text-sm text-slate-300">در حال Refresh کردن صفحه...</p>
+            <div className="mt-4 h-1 w-64 overflow-hidden rounded-full bg-slate-700">
+              <div className="h-full w-full animate-loading-bar bg-gradient-to-r from-green-400 to-emerald-500" />
+            </div>
+            <p className="mt-2 text-xs text-slate-400">5 ثانیه باقی مانده</p>
+          </div>
+        </div>
+      )}
       <div className="mb-8 flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-600/30">
           <BrainCircuit size={24} className="text-white" />
@@ -290,7 +365,7 @@ export default function InstallWizard() {
       )}
 
       <div className="card-surface p-6 anim-fade-up" key={step}>
-        {step === 0 && <StepAdmin schoolName={schoolName} setSchoolName={setSchoolName} onDone={setAdmin} />}
+        {step === 0 && <StepAdmin schoolName={schoolName} setSchoolName={setSchoolName} admin={admin} onDone={setAdmin} />}
         {step === 1 && (
           <StepGrades
             grades={gradeNames}
@@ -320,6 +395,7 @@ export default function InstallWizard() {
             gradeNames={gradeNames}
             classNames={classNames}
             takenUsernames={[admin.username, ...consultants.map((c) => c.username), ...teachers.map((t) => t.username)]}
+            onSkip={() => { setStudents([]); setStep(6); }}
           />
         )}
         {step === 6 && (
@@ -330,11 +406,12 @@ export default function InstallWizard() {
             gradeNames={gradeNames}
             classNames={classNames}
             takenUsernames={[admin.username, ...consultants.map((c) => c.username), ...students.map((s) => s.username)]}
+            onSkip={() => { setTeachers([]); setStep(7); }}
           />
         )}
         {step === 7 &&
           (records ? (
-            <FinishPanel records={records} onLogin={() => navigate("/login")} />
+            <FinishPanel records={records} onDownload={() => downloadCSV(records)} />
           ) : (
             <div className="space-y-5">
               <div>
@@ -343,16 +420,6 @@ export default function InstallWizard() {
                   با ادامه، کدهای دسترسی برای مدیر، دبیران، مشاوران، والدین و دانش‌آموزان تولید و داده‌های اولیه در فایل‌های JSON ذخیره می‌شوند.
                 </p>
               </div>
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-500/25 bg-blue-500/10 p-4">
-                <input type="checkbox" checked={loadDemo} onChange={(e) => setLoadDemo(e.target.checked)} className="mt-1 accent-blue-500" />
-                <span>
-                  <span className="block text-[13px] font-medium text-blue-200">درج داده‌های نمونه تحصیلی (توصیه‌شده برای نمایش)</span>
-                  <span className="mt-0.5 block text-[12px] leading-5 text-slate-400">
-                    نمرات ۴ آزمون، حضور و غیاب، تکالیف، فرم‌های سلامت روان و گزارش‌های رفتاری برای ۵ ماه گذشته تولید می‌شود تا داشبوردها و الگوریتم‌ها به‌صورت زنده نمایش داده شوند.
-                  </span>
-                </span>
-              </label>
-              {lessons.length === 0 && loadDemo && <p className="text-[12px] text-amber-300/90">چون دروس ثبت نشد، ۶ درس پیش‌فرض (ریاضی، فیزیک، فارسی، شیمی، تاریخ، انگلیسی) برای داده‌های نمونه استفاده می‌شود.</p>}
             </div>
           ))}
 
@@ -380,20 +447,11 @@ export default function InstallWizard() {
 
 /* ================= step 1 — admin ================= */
 
-function StepAdmin({ schoolName, setSchoolName, onDone }: { schoolName: string; setSchoolName: (v: string) => void; onDone: (a: { fullName: string; username: string; password: string }) => void }) {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<AdminForm>({ defaultValues: { fullName: "", username: "", password: "", confirm: "" } });
-  const pwd = watch("password");
+function StepAdmin({ schoolName, setSchoolName, admin, onDone }: { schoolName: string; setSchoolName: (v: string) => void; admin: { fullName: string; username: string; password: string }; onDone: (a: { fullName: string; username: string; password: string }) => void }) {
+  const [confirm, setConfirm] = useState("");
+  const [confirmErr, setConfirmErr] = useState(false);
   return (
-    <form
-      onSubmit={handleSubmit((v) => {
-        const err = validatePassword(v.password);
-        if (err) return notify.error(err);
-        if (v.password !== v.confirm) return notify.error("تأیید رمز عبور یکسان نیست");
-        onDone({ fullName: v.fullName, username: v.username, password: v.password });
-        notify.success("اطلاعات مدیر ثبت شد — در مرحله آخر کد دسترسی خواهید دید");
-      })}
-      className="space-y-4"
-    >
+    <div className="space-y-4">
       <div>
         <h3 className="mb-1 flex items-center gap-2 text-[15px] font-semibold text-slate-100"><ShieldCheck size={17} className="text-blue-400" /> ایجاد حساب مدیر</h3>
         <p className="text-[12px] text-slate-500">حساب مدیر کل سامانه را مدیریت می‌کند. رمز عبور با الگوریتم SHA-256 و Salt ذخیره می‌شود.</p>
@@ -402,27 +460,22 @@ function StepAdmin({ schoolName, setSchoolName, onDone }: { schoolName: string; 
         <Input value={schoolName} onChange={(e) => setSchoolName(e.target.value)} placeholder="مثلاً: مدرسه نمونه خوارزمی" />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="نام و نام خانوادگی مدیر" error={errors.fullName ? "الزامی" : undefined}>
-          <Input {...register("fullName", { required: true })} placeholder="مثلاً: علی رضایی" />
+        <Field label="نام و نام خانوادگی مدیر">
+          <Input value={admin.fullName} onChange={(e) => onDone({ ...admin, fullName: e.target.value })} placeholder="مثلاً: علی رضایی" />
         </Field>
-        <Field label="نام کاربری" error={errors.username ? "الزامی" : undefined}>
-          <Input dir="ltr" {...register("username", { required: true, minLength: 3 })} placeholder="admin" />
+        <Field label="نام کاربری">
+          <Input dir="ltr" value={admin.username} onChange={(e) => onDone({ ...admin, username: e.target.value })} placeholder="admin" />
         </Field>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="رمز عبور" error={errors.password ? "الزامی" : undefined}>
-          <Input dir="ltr" type="password" {...register("password", { required: true, minLength: 6 })} placeholder="حداقل ۶ کاراکتر" />
+        <Field label="رمز عبور">
+          <PasswordInput value={admin.password} onChange={(v) => onDone({ ...admin, password: v })} placeholder="حداقل ۶ کاراکتر" />
         </Field>
-        <Field label="تأیید رمز عبور" error={errors.confirm ? "الزامی" : undefined}>
-          <Input dir="ltr" type="password" {...register("confirm", { required: true, validate: (v) => v === pwd || "تأیید رمز عبور یکسان نیست" })} />
+        <Field label="تأیید رمز عبور" error={confirmErr ? "رمز عبور یکسان نیست" : undefined}>
+          <PasswordInput value={confirm} onChange={(v) => { setConfirm(v); setConfirmErr(v.length > 0 && v !== admin.password); }} placeholder="دوباره رمز را وارد کنید" />
         </Field>
       </div>
-      <div className="flex justify-end">
-        <Button type="submit">
-          <Check size={15} /> ثبت مدیر
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }
 
@@ -577,8 +630,9 @@ interface EntryRec {
 }
 
 function EntryList({ items, setItems, title, desc }: { items: EntryRec[]; setItems: (i: EntryRec[]) => void; title: string; desc: string }) {
-  const { register, handleSubmit, reset } = useForm<EntryForm>({ defaultValues: { fullName: "", username: "", password: "" } });
+  const { register, handleSubmit, reset, watch, setValue } = useForm<EntryForm>({ defaultValues: { fullName: "", username: "", password: "" } });
   const taken = items.map((i) => i.username.toLowerCase());
+  const pwdValue = watch("password");
   return (
     <div>
       <h3 className="mb-1 flex items-center gap-2 text-[15px] font-semibold text-slate-100"><UserPlus size={17} className="text-blue-400" /> {title}</h3>
@@ -595,7 +649,7 @@ function EntryList({ items, setItems, title, desc }: { items: EntryRec[]; setIte
       >
         <Input dir="auto" placeholder="نام و نام خانوادگی" {...register("fullName")} />
         <Input dir="ltr" placeholder="نام کاربری" {...register("username")} />
-        <Input dir="ltr" type="password" placeholder="رمز عبور" {...register("password")} />
+        <PasswordInput value={pwdValue} onChange={(v) => setValue("password", v, { shouldValidate: true })} placeholder="رمز عبور" />
         <Button type="submit" variant="outline" className="h-fit">
           <Plus size={15} /> ثبت
         </Button>
@@ -618,7 +672,7 @@ function EntryList({ items, setItems, title, desc }: { items: EntryRec[]; setIte
 }
 
 function StepConsultants({ items, setItems }: { items: { fullName: string; username: string; password: string }[]; setItems: (i: { fullName: string; username: string; password: string }[]) => void }) {
-  return <EntryList items={items} setItems={setItems} title="مشاور مدرسه" desc="حساب مشاور برای پایش سلامت روان و دانش‌آموزان پرخطر ساخته می‌شود." />;
+  return <EntryList items={items} setItems={setItems} title="مشاور و ناظم مدرسه" desc="حساب مشاور/ناظم برای پایش سلامت روان و دانش‌آموزان پرخطر ساخته می‌شود." />;
 }
 
 /* ================= step 6 — students ================= */
@@ -629,21 +683,27 @@ function StepStudents({
   gradeNames,
   classNames,
   takenUsernames,
+  onSkip,
 }: {
   items: InstallStudent[];
   setItems: (i: InstallStudent[]) => void;
   gradeNames: string[];
   classNames: string[][];
   takenUsernames: string[];
+  onSkip: () => void;
 }) {
   const [form, setForm] = useState({ fullName: "", username: "", password: "", gradeIdx: 0, classIdx: 0, nationalId: "", fatherName: "", motherName: "", phone: "", emergencyPhone: "" });
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<typeof form>({ defaultValues: form });
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<typeof form>({ defaultValues: form });
   const selGrade = Number(watch("gradeIdx") ?? 0);
+  const pwdValue = watch("password");
   return (
     <div>
-      <h3 className="mb-1 text-[15px] font-semibold text-slate-100">دانش‌آموزان</h3>
+      <div className="mb-1 flex items-center justify-between">
+        <h3 className="text-[15px] font-semibold text-slate-100">دانش‌آموزان</h3>
+        <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
+      </div>
       <p className="mb-4 text-[12px] leading-6 text-slate-500">
-        برای هر دانش‌آموز به‌صورت خودکار حساب <b className="text-slate-300">والدین</b> با نام کاربری <b className="text-slate-300">parent_نام_کاربری_دانش‌آموز</b> و رمز عبور برابر با رمز مدیر ساخته می‌شود.
+        برای هر دانش‌آموز به‌صورت خودکار حساب <b className="text-slate-300">والدین</b> با نام کاربری <b className="text-slate-300">parent_نام_کاربری_دانش‌آموز</b> و رمز عبور برابر با رمز مدیر ساخته می‌شود. <span className="text-amber-300/80">(اختیاری)</span>
       </p>
       <form
         onSubmit={handleSubmit((v) => {
@@ -665,7 +725,7 @@ function StepStudents({
           <Input dir="ltr" {...register("username", { required: true, minLength: 3 })} />
         </Field>
         <Field label="رمز عبور" error={errors.password ? "الزامی" : undefined}>
-          <Input dir="ltr" type="password" {...register("password", { required: true, minLength: 6 })} />
+          <PasswordInput value={pwdValue} onChange={(v) => setValue("password", v, { shouldValidate: true })} placeholder="حداقل ۶ کاراکتر" />
         </Field>
         <Field label="پایه">
           <Select {...register("gradeIdx")}>
@@ -738,6 +798,7 @@ function StepTeachers({
   gradeNames,
   classNames,
   takenUsernames,
+  onSkip,
 }: {
   items: InstallTeacher[];
   setItems: (i: InstallTeacher[]) => void;
@@ -745,11 +806,13 @@ function StepTeachers({
   gradeNames: string[];
   classNames: string[][];
   takenUsernames: string[];
+  onSkip: () => void;
 }) {
   const [assign, setAssign] = useState<{ lessonIdx: number; gradeIdx: number; classIdx: number }[]>([]);
   const [draft, setDraft] = useState<{ lessonIdx: number; gradeIdx: number; classIdx: number }>({ lessonIdx: 0, gradeIdx: 0, classIdx: 0 });
-  const { register, handleSubmit, reset } = useForm<EntryForm>({ defaultValues: { fullName: "", username: "", password: "" } });
+  const { register, handleSubmit, reset, watch, setValue } = useForm<EntryForm>({ defaultValues: { fullName: "", username: "", password: "" } });
   const classOptions = classNames[draft.gradeIdx] ?? [];
+  const pwdValue = watch("password");
   const addAssignment = () => {
     if (!lessons[draft.lessonIdx]) return notify.error("ابتدا یک درس انتخاب کنید");
     if (!classOptions[draft.classIdx]) return notify.error("ابتدا یک کلاس انتخاب کنید");
@@ -759,9 +822,12 @@ function StepTeachers({
   if (lessons.length === 0) {
     return (
       <div>
-        <h3 className="mb-1 text-[15px] font-semibold text-slate-100">دبیران</h3>
+        <div className="mb-1 flex items-center justify-between">
+          <h3 className="text-[15px] font-semibold text-slate-100">دبیران</h3>
+          <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
+        </div>
         <p className="text-[12px] leading-6 text-amber-300/90">
-          چون مرحله دروس رد شده، فعلاً امکان اختصاص درس وجود ندارد. بعد از نصب می‌توانید دروس را از بخش تنظیمات اضافه کنید. (دبیر ثبت می‌شود و بعداً درس می‌گیرد.)
+          چون مرحله دروس رد شده، فعلاً امکان اختصاص درس وجود ندارد. بعد از نصب می‌توانید دروس را از بخش تنظیمات اضافه کنید. (دبیر ثبت می‌شود و بعداً درس می‌گیرد.) <span className="text-slate-500">(اختیاری)</span>
         </p>
         <form
           onSubmit={handleSubmit((v) => {
@@ -775,7 +841,7 @@ function StepTeachers({
         >
           <Input placeholder="نام و نام خانوادگی" {...register("fullName")} />
           <Input dir="ltr" placeholder="نام کاربری" {...register("username")} />
-          <Input dir="ltr" type="password" placeholder="رمز عبور" {...register("password")} />
+          <PasswordInput value={pwdValue} onChange={(v) => setValue("password", v, { shouldValidate: true })} placeholder="رمز عبور" />
           <Button type="submit" variant="outline" className="h-fit">
             <Plus size={15} /> ثبت
           </Button>
@@ -797,8 +863,11 @@ function StepTeachers({
   }
   return (
     <div>
-      <h3 className="mb-1 text-[15px] font-semibold text-slate-100">دبیران</h3>
-      <p className="mb-4 text-[12px] leading-6 text-slate-500">هر دبیر می‌تواند چندین درس در چندین کلاس تدریس کند. مثلاً: ریاضی در پایه ۱ کلاس ۱ و پایه ۲ کلاس ۲.</p>
+      <div className="mb-1 flex items-center justify-between">
+        <h3 className="text-[15px] font-semibold text-slate-100">دبیران</h3>
+        <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
+      </div>
+      <p className="mb-4 text-[12px] leading-6 text-slate-500">هر دبیر می‌تواند چندین درس در چندین کلاس تدریس کند. مثلاً: ریاضی در پایه ۱ کلاس ۱ و پایه ۲ کلاس ۲. <span className="text-amber-300/80">(اختیاری)</span></p>
       <form
         onSubmit={handleSubmit((v) => {
           if (!v.fullName.trim() || !v.username.trim()) return notify.error("نام و نام کاربری الزامی است");
@@ -814,7 +883,7 @@ function StepTeachers({
         <div className="mb-4 grid gap-3 rounded-xl border border-slate-700/50 bg-[#0b1222] p-4 sm:grid-cols-4">
           <Input placeholder="نام و نام خانوادگی" {...register("fullName")} />
           <Input dir="ltr" placeholder="نام کاربری" {...register("username")} />
-          <Input dir="ltr" type="password" placeholder="رمز عبور" {...register("password")} />
+          <PasswordInput value={pwdValue} onChange={(v) => setValue("password", v, { shouldValidate: true })} placeholder="رمز عبور" />
           <Button type="submit" variant="outline" className="h-fit">
             <Plus size={15} /> ثبت دبیر
           </Button>
@@ -894,11 +963,11 @@ function StepTeachers({
 
 /* ================= finish ================= */
 
-function FinishPanel({ records, onLogin }: { records: AccessRecord[]; onLogin: () => void }) {
+function FinishPanel({ records, onDownload }: { records: AccessRecord[]; onDownload: () => void }) {
   const roles: { role: Role; label: string }[] = [
     { role: "admin", label: "مدیر" },
     { role: "teacher", label: "دبیر" },
-    { role: "consultant", label: "مشاور" },
+    { role: "consultant", label: "مشاور و ناظم" },
     { role: "student", label: "دانش‌آموز" },
     { role: "parent", label: "والدین" },
   ];
@@ -937,9 +1006,9 @@ function FinishPanel({ records, onLogin }: { records: AccessRecord[]; onLogin: (
           );
         })}
       </div>
-      <div className="mt-6 flex justify-end">
-        <Button variant="success" onClick={onLogin}>
-          <KeyRound size={15} /> ورود به سامانه
+      <div className="mt-5 flex justify-end">
+        <Button variant="outline" onClick={onDownload}>
+          <Download size={15} /> دانلود فایل CSV
         </Button>
       </div>
     </div>
