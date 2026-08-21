@@ -189,6 +189,7 @@ export default function InstallWizard() {
   const [records, setRecords] = useState<AccessRecord[] | null>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState(0);
 
   const navigate = useNavigate();
 
@@ -252,9 +253,11 @@ export default function InstallWizard() {
       setRecords(result.records);
       downloadCSV(result.records);
       setShowSuccess(true);
+      setLoadingPhase(0);
+      setTimeout(() => setLoadingPhase(1), 10000);
       setTimeout(() => {
         window.location.reload();
-      }, 5000);
+      }, 15000);
     } catch {
       notify.error("خطا در نصب — دوباره تلاش کنید");
     } finally {
@@ -265,20 +268,127 @@ export default function InstallWizard() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       {showSuccess && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm animate-fade-transition">
-          <div className="mb-8 flex flex-col items-center gap-4">
-            <div className="relative flex h-24 w-24 items-center justify-center">
-              <div className="absolute h-full w-full animate-ping rounded-full bg-green-500/30" />
-              <div className="absolute h-20 w-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 shadow-lg shadow-green-500/30" />
-              <CheckCircle size={40} className="relative z-10 text-white" />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 backdrop-blur-md">
+          {loadingPhase === 0 ? (
+            /* Phase 1: Luma Spin + Progress */
+            <div className="flex flex-col items-center gap-6 animate-fade-in-up">
+              {/* Luma Spin */}
+              <div className="relative h-20 w-20">
+                <div className="absolute inset-0 animate-luma-spin">
+                  <svg viewBox="0 0 80 80" fill="none" className="h-20 w-20">
+                    <circle cx="40" cy="40" r="36" stroke="url(#luma-grad)" strokeWidth="4" strokeLinecap="round" strokeDasharray="180 80" />
+                    <defs>
+                      <linearGradient id="luma-grad" x1="0" y1="0" x2="80" y2="80">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="50%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#06b6d4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/30 animate-pulse-glow" />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold text-slate-100">در حال نصب سامانه...</h2>
+              <p className="text-sm text-slate-400">لطفاً صبر کنید — اطلاعات در حال ذخیره‌سازی است</p>
+              {/* Progress bar */}
+              <div className="h-1.5 w-72 overflow-hidden rounded-full bg-slate-700/60">
+                <div className="h-full animate-progress-10s rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500" />
+              </div>
+              <p className="text-xs text-slate-500">حداکثر ۱۰ ثانیه</p>
             </div>
-            <h2 className="text-2xl font-bold text-green-400">نصب با موفقیت انجام شد!</h2>
-            <p className="text-sm text-slate-300">در حال Refresh کردن صفحه...</p>
-            <div className="mt-4 h-1 w-64 overflow-hidden rounded-full bg-slate-700">
-              <div className="h-full w-full animate-loading-bar bg-gradient-to-r from-green-400 to-emerald-500" />
+          ) : (
+            /* Phase 2: Orbit + Complete */
+            <div className="flex flex-col items-center gap-8 animate-fade-in-up">
+              {/* Orbit Animation */}
+              <div className="relative h-64 w-64">
+                {/* Center logo */}
+                <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl shadow-blue-600/40 animate-pulse-glow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+                      <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+                      <path d="M9 13a4.5 4.5 0 0 0 3-4"/>
+                      <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+                      <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
+                      <path d="M6 18a4 4 0 0 1-1.967-.516"/>
+                      <path d="M12 13h4"/>
+                      <path d="M12 18h6a2 2 0 0 1 2 2v1"/>
+                      <path d="M12 8h8"/>
+                      <path d="M16 8V5a2 2 0 0 1 2-2"/>
+                      <circle cx="16" cy="13" r=".5"/>
+                      <circle cx="18" cy="3" r=".5"/>
+                      <circle cx="20" cy="21" r=".5"/>
+                      <circle cx="20" cy="8" r=".5"/>
+                    </svg>
+                  </div>
+                </div>
+                {/* Orbit ring 1 — inner */}
+                <div className="absolute inset-8 animate-orbit-1">
+                  <div className="relative h-full w-full">
+                    {[0, 90, 180, 270].map((deg) => (
+                      <div key={deg} className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" style={{ transform: `rotate(${deg}deg) translateY(-96px) rotate(-${deg}deg)` }}>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800/80 border border-slate-700/50 shadow-lg">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                            <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" />
+                            <path d="M6 10h12l1 10H5L6 10z" />
+                          </svg>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Orbit ring 2 — middle */}
+                <div className="absolute inset-2 animate-orbit-2">
+                  <div className="relative h-full w-full">
+                    {[45, 135, 225, 315].map((deg) => (
+                      <div key={deg} className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" style={{ transform: `rotate(${deg}deg) translateY(-120px) rotate(-${deg}deg)` }}>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800/80 border border-slate-700/50 shadow-lg">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                            <rect x="3" y="4" width="18" height="5" rx="1.5" />
+                            <rect x="5" y="10" width="14" height="5" rx="1.5" />
+                            <rect x="7" y="16" width="10" height="4" rx="1.5" />
+                          </svg>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Orbit ring 3 — outer */}
+                <div className="absolute -inset-4 animate-orbit-3">
+                  <div className="relative h-full w-full">
+                    {[0, 60, 120, 180, 240, 300].map((deg) => (
+                      <div key={deg} className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2" style={{ transform: `rotate(${deg}deg) translateY(-148px) rotate(-${deg}deg)` }}>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800/80 border border-slate-700/50 shadow-lg">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                          </svg>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Orbit ring lines (decorative) */}
+                <svg className="absolute inset-0 h-full w-full" viewBox="0 0 256 256">
+                  <circle cx="128" cy="128" r="80" fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth="1" strokeDasharray="4 4" />
+                  <circle cx="128" cy="128" r="104" fill="none" stroke="rgba(139,92,246,0.12)" strokeWidth="1" strokeDasharray="4 4" />
+                  <circle cx="128" cy="128" r="128" fill="none" stroke="rgba(6,182,212,0.1)" strokeWidth="1" strokeDasharray="4 4" />
+                </svg>
+              </div>
+              {/* Text */}
+              <div className="text-center">
+                <h2 className="mb-2 text-2xl font-bold text-emerald-400">نصب با موفقیت انجام شد!</h2>
+                <p className="text-sm text-slate-300">سامانه هوشمند مدارس (SIP) آماده است</p>
+              </div>
+              <div className="h-1 w-48 overflow-hidden rounded-full bg-slate-700">
+                <div className="h-full w-full animate-loading-bar bg-gradient-to-r from-emerald-400 to-green-500" />
+              </div>
+              <p className="text-xs text-slate-400">۵ ثانیه دیگر صفحه رفرش می‌شود...</p>
             </div>
-            <p className="mt-2 text-xs text-slate-400">5 ثانیه باقی مانده</p>
-          </div>
+          )}
         </div>
       )}
       <div className="mb-8 flex items-center gap-3">
