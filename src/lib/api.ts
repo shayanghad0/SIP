@@ -931,7 +931,7 @@ export async function addStudentRecord(payload: {
   const parentsFile = readDb<ParentsFile>("parents");
   const exists = studentsFile.students.find((s) => s.username.toLowerCase() === payload.username.toLowerCase());
   if (exists) throw new Error("نام کاربری دانش‌آموز قبلاً وجود دارد");
-  const parentPassword = generatePassword();
+  const parentPassword = payload.password;
   const stHash = await hashPassword(payload.password);
   const parHash = await hashPassword(parentPassword);
   const stId = nextId("st");

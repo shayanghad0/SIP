@@ -303,7 +303,7 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
           emergencyPhone: v.emergencyPhone,
         });
         notify.success("دانش‌آموز اضافه شد — حساب والدین نیز ساخته شد");
-        notify.info(`والد: ${res.parent.username} / رمز: ${res.parentPassword}`);
+        notify.info(`حساب والد: ${res.parent.username} — رمز عبور همان رمز دانش‌آموز است`);
       }
       setShowAdd(false);
       reset();
