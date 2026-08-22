@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIP | سیپ - سامانه یکپارچه پیشرفت دانش آموزی</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* ========== START PROVIDED CSS ========== */
+        :root {
+            --font-sans: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+            --color-primary: #2563eb;
+            --color-primary-soft: #3b82f6;
+            --color-ink-950: #070b14;
+            --color-ink-900: #0a101f;
+            --color-ink-850: #0d1526;
+            --color-ink-800: #101a30;
+            --color-ink-700: #16233f;
+        }
+
+        :root {
+            color-scheme: dark;
+        }
+
+        html {
+            font-family: "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #070b14;
+            background-image:
+                radial-gradient(1100px 500px at 85% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
+                radial-gradient(900px 420px at 0% 0%, rgba(14, 165, 233, 0.07), transparent 55%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #1e293b transparent;
+        }
+        *::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        input, select, textarea {
+            font-family: inherit;
+        }
+
+        select option {
+            background-color: #0d1526;
+            color: #e2e8f0;
+        }
+
+        @keyframes sip-fade-up {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sip-fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes sip-scale-in {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes sip-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @keyframes sip-pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+        .anim-fade-up { animation: sip-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .anim-fade-in { animation: sip-fade-in 0.35s ease both; }
+        .anim-scale-in { animation: sip-scale-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .anim-delay-1 { animation-delay: 0.06s; }
+        .anim-delay-2 { animation-delay: 0.12s; }
+        .anim-delay-3 { animation-delay: 0.18s; }
+        .anim-delay-4 { animation-delay: 0.24s; }
+        .skeleton {
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.08) 25%, rgba(148, 163, 184, 0.16) 50%, rgba(148, 163, 184, 0.08) 75%);
+            background-size: 200% 100%;
+            animation: sip-shimmer 1.4s infinite linear;
+            border-radius: 0.75rem;
+        }
+        .pulse-dot { animation: sip-pulse-dot 1.6s ease-in-out infinite; }
+        .card-surface {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 1.1rem;
+        }
+        .chart-ltr { direction: ltr; }
+        input[type="range"] { accent-color: #2563eb; }
+        @keyframes loading-bar {
+            0% { width: 100%; margin-left: 0%; }
+            100% { width: 0%; margin-left: 100%; }
+        }
+        .animate-loading-bar { animation: loading-bar 5s linear forwards; }
+        @keyframes page-transition {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes page-transition-fade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes section-transition {
+            0% { opacity: 0; transform: translateX(10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .animate-page-transition { animation: page-transition 0.3s ease-out forwards; }
+        .animate-section-transition { animation: section-transition 0.2s ease-out forwards; }
+        .animate-fade-transition { animation: page-transition-fade 0.2s ease-out forwards; }
+        @keyframes luma-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-luma-spin { animation: luma-spin 2s linear infinite; }
+        @keyframes progress-fill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .animate-progress-10s { animation: progress-fill 10s linear forwards; }
+        @keyframes orbit-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .animate-orbit-1 { animation: orbit-spin 12s linear infinite; }
+        .animate-orbit-2 { animation: orbit-spin 18s linear infinite reverse; }
+        .animate-orbit-3 { animation: orbit-spin 25s linear infinite; }
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(34, 197, 94, 0.6); }
+        }
+        .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        /* ========== END PROVIDED CSS ========== */
+
+        /* Additional page-specific styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+        .glass-nav {
+            background: rgba(7, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .orbit-ring {
+            position: absolute;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            background: rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #93c5fd;
+        }
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .commit-item {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .commit-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #93c5fd;
+        }
+        .commit-meta {
+            flex: 1;
+            min-width: 0;
+        }
+        .commit-message {
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .commit-author {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .commit-date {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .file-tree {
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .file-tree-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.2rem 0;
+        }
+        .file-tree-indent {
+            display: inline-block;
+            width: 1.2rem;
+        }
+        .folder-icon, .file-icon {
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .role-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .role-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        /* RTL adjustment */
+        [dir="rtl"] .commit-item {
+            flex-direction: row-reverse;
+        }
+        [dir="rtl"] .commit-meta {
+            text-align: right;
+        }
+        [dir="rtl"] .file-tree-item {
+            direction: ltr;
+        }
+        [dir="rtl"] .lang-btn {
+            font-family: "Vazirmatn", sans-serif;
+        }
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(148,163,184,0.1);
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="animate-page-transition">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="glass-nav">
+        <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 40px; height: 40px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <!-- SVG Logo -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+                        <path d="M9 13a4.5 4.5 0 0 0 3-4"/>
+                        <path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/>
+                        <path d="M3.477 10.896a4 4 0 0 1 .585-.396"/>
+                        <path d="M6 18a4 4 0 0 1-1.967-.516"/>
+                        <path d="M12 13h4"/>
+                        <path d="M12 18h6a2 2 0 0 1 2 2v1"/>
+                        <path d="M12 8h8"/>
+                        <path d="M16 8V5a2 2 0 0 1 2-2"/>
+                        <circle cx="16" cy="13" r=".5"/>
+                        <circle cx="18" cy="3" r=".5"/>
+                        <circle cx="20" cy="21" r=".5"/>
+                        <circle cx="20" cy="8" r=".5"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-weight: 700;">School Intelligence Platform</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8;">سیپ - سامانه یکپارچه پیشرفت دانش آموزی</div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="https://github.com/shayanghad0/sip" target="_blank" style="text-decoration: none; color: #e2e8f0; display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.5rem 0.75rem; border-radius: 0.75rem; border: 1px solid rgba(148,163,184,0.1);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    GitHub
+                </a>
+                <button class="lang-btn" onclick="toggleLanguage()">
+                    <span class="en">فارسی</span>
+                    <span class="fa" style="display:none;">English</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <!-- Orbit decorations -->
+        <div class="orbit-ring" style="width: 450px; height: 450px; top: -150px; right: -150px; animation: orbit-spin 20s linear infinite;"></div>
+        <div class="orbit-ring" style="width: 300px; height: 300px; top: -80px; right: -80px; animation: orbit-spin 15s linear infinite reverse;"></div>
+        <div class="orbit-ring" style="width: 600px; height: 600px; bottom: -250px; left: -250px; animation: orbit-spin 30s linear infinite;"></div>
+
+        <div class="container" style="position: relative; z-index: 2;">
+            <div class="animate-fade-up">
+                <span class="badge">جشنواره خوارزمی | برنامه‌نویسی</span>
+                <h1 style="font-size: 3.5rem; font-weight: 800; margin: 1rem 0; line-height: 1.2;">
+                    <span class="en">School Intelligence Platform</span>
+                    <span class="fa" style="display:none;">سیپ - سامانه یکپارچه پیشرفت دانش آموزی</span>
+                </h1>
+                <p style="font-size: 1.2rem; color: #94a3b8; max-width: 700px; margin-bottom: 2rem;">
+                    <span class="en">Smart school management, analysis and prediction system — solving real educational problems with algorithms, not just attendance and grades.</span>
+                    <span class="fa" style="display:none;">سامانه هوشمند مدیریت، تحلیل و پیش‌بینی وضعیت دانش‌آموز — حل مشکلات واقعی مدارس با الگوریتم، نه فقط حضور و غیاب و نمره.</span>
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="#about" class="btn-primary" style="background: #2563eb; padding: 0.75rem 1.5rem; border-radius: 0.75rem; text-decoration: none; color: white; font-weight: 600;">Explore</a>
+                    <a href="#github" class="btn-secondary" style="background: rgba(255,255,255,0.05); padding: 0.75rem 1.5rem; border-radius: 0.75rem; text-decoration: none; color: #e2e8f0; border: 1px solid rgba(148,163,184,0.1);">GitHub Repo</a>
+                </div>
+                <!-- Stats -->
+                <div style="display: flex; gap: 2rem; margin-top: 3rem; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: #93c5fd;">10</div>
+                        <div class="en" style="font-size: 0.85rem; color: #94a3b8;">Smart Algorithms</div>
+                        <div class="fa" style="font-size: 0.85rem; color: #94a3b8; display:none;">الگوریتم هوشمند</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: #93c5fd;">5</div>
+                        <div class="en" style="font-size: 0.85rem; color: #94a3b8;">User Roles</div>
+                        <div class="fa" style="font-size: 0.85rem; color: #94a3b8; display:none;">نقش کاربری</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: #93c5fd;">100%</div>
+                        <div class="en" style="font-size: 0.85rem; color: #94a3b8;">JSON Database</div>
+                        <div class="fa" style="font-size: 0.85rem; color: #94a3b8; display:none;">پایگاه داده JSON</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ABOUT SECTION ========== -->
+    <section id="about" class="container" style="padding: 4rem 0;">
+        <h2 class="section-title">
+            <span class="en">About the Project</span>
+            <span class="fa" style="display:none;">معرفی پروژه</span>
+        </h2>
+        <div class="card-surface" style="padding: 1.5rem;">
+            <p class="en">
+                School Intelligence Platform (SIP) is a modern web application built for educational institutions. The project's primary objective is to help school administrators, teachers, consultants, parents, and students make better decisions through intelligent analysis and predictive algorithms. Unlike conventional school management systems, SIP focuses on identifying educational risks early, improving communication between all stakeholders, and providing actionable recommendations using AI-powered analytics.
+            </p>
+            <p class="fa" style="display:none;">
+                سیپ - سامانه یکپارچه پیشرفت دانش آموزی (SIP) یک اپلیکیشن وب مدرن برای مؤسسات آموزشی است. هدف اصلی این پروژه کمک به مدیران، معلمان، مشاوران، والدین و دانش‌آموزان برای تصمیم‌گیری بهتر از طریق تحلیل هوشمند و الگوریتم‌های پیش‌بینی است. برخلاف سیستم‌های مدیریت مدرسه سنتی، SIP بر شناسایی زودهنگام خطرات آموزشی، بهبود ارتباط بین ذی‌نفعان و ارائه توصیه‌های عملی با استفاده از تحلیل‌های مبتنی بر هوش مصنوعی تمرکز دارد.
+            </p>
+        </div>
+    </section>
+
+    <!-- ========== GOALS ========== -->
+    <section class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">Project Goals</span>
+            <span class="fa" style="display:none;">اهداف پروژه</span>
+        </h2>
+        <div class="grid-cards">
+            <!-- Goal 1 -->
+            <div class="card-surface role-card" style="padding: 1.25rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                </div>
+                <h3 class="en" style="font-weight: 600;">Early Detection</h3>
+                <h3 class="fa" style="font-weight: 600; display:none;">تشخیص زودهنگام</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Identify academic decline before report cards.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">شناسایی افت تحصیلی قبل از کارنامه.</p>
+            </div>
+            <!-- Goal 2 -->
+            <div class="card-surface role-card" style="padding: 1.25rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+                </div>
+                <h3 class="en" style="font-weight: 600;">Data-Driven Decisions</h3>
+                <h3 class="fa" style="font-weight: 600; display:none;">تصمیم‌گیری داده‌محور</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Use analytics for smarter school management.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">استفاده از تحلیل برای مدیریت هوشمند مدرسه.</p>
+            </div>
+            <!-- Goal 3 -->
+            <div class="card-surface role-card" style="padding: 1.25rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 class="en" style="font-weight: 600;">Better Communication</h3>
+                <h3 class="fa" style="font-weight: 600; display:none;">ارتباط بهتر</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Bridge the gap between school, parents, and students.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">پر کردن شکاف بین مدرسه، والدین و دانش‌آموزان.</p>
+            </div>
+            <!-- Goal 4 -->
+            <div class="card-surface role-card" style="padding: 1.25rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-4 12.7V21a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6.3A7 7 0 0 0 12 2z"/><path d="M12 11v4"/></svg>
+                </div>
+                <h3 class="en" style="font-weight: 600;">AI-Powered</h3>
+                <h3 class="fa" style="font-weight: 600; display:none;">قدرت‌گرفته از AI</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Leverage intelligent algorithms for risk prediction.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">استفاده از الگوریتم‌های هوشمند برای پیش‌بینی ریسک.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ROLES ========== -->
+    <section class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">User Roles</span>
+            <span class="fa" style="display:none;">نقش‌های سیستم</span>
+        </h2>
+        <div class="grid-cards">
+            <!-- Admin -->
+            <div class="card-surface role-card" style="padding: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M18 8l2 2 4-4"/></svg>
+                </div>
+                <h3 style="font-weight: 600; margin-top: 0;">Administrator</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Manage school, users, analytics, and system health.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">مدیریت مدرسه، کاربران، تحلیل‌ها و سلامت سیستم.</p>
+            </div>
+            <!-- Teacher -->
+            <div class="card-surface role-card" style="padding: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <h3 style="font-weight: 600; margin-top: 0;">Teacher</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Manage classes, attendance, homework, exams, grades.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">مدیریت کلاس‌ها، حضور و غیاب، تکالیف، آزمون‌ها و نمرات.</p>
+            </div>
+            <!-- Consultant -->
+            <div class="card-surface role-card" style="padding: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h3 style="font-weight: 600; margin-top: 0;">Consultant</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Monitor mental health, high-risk students, AI suggestions.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">پایش سلامت روان، دانش‌آموزان پرخطر و پیشنهادهای هوشمند.</p>
+            </div>
+            <!-- Parent -->
+            <div class="card-surface role-card" style="padding: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 style="font-weight: 600; margin-top: 0;">Parent</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Track child's progress, attendance, homework, alerts.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">پیگیری پیشرفت فرزند، حضور، تکالیف و هشدارها.</p>
+            </div>
+            <!-- Student -->
+            <div class="card-surface role-card" style="padding: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M12 12v5"/></svg>
+                </div>
+                <h3 style="font-weight: 600; margin-top: 0;">Student</h3>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">View grades, homework, study plans, wellness forms.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">مشاهده نمرات، تکالیف، برنامه مطالعاتی و فرم‌های سلامت.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ALGORITHMS ========== -->
+    <section class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">Intelligent Algorithms</span>
+            <span class="fa" style="display:none;">الگوریتم‌های هوشمند</span>
+        </h2>
+        <div class="grid-cards">
+            <!-- Algorithm 1 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">1</span>
+                    <h4 style="font-weight: 600; margin: 0;">Early Warning AI</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Risk Score 0-100 based on grades, attendance, behavior, etc. Alerts when >75.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">امتیاز ریسک ۰ تا ۱۰۰ بر اساس نمرات، حضور، رفتار و... هشدار در صورت بالای ۷۵.</p>
+            </div>
+            <!-- Algorithm 2 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">2</span>
+                    <h4 style="font-weight: 600; margin: 0;">Mental Health Analysis</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Weekly wellness form analyzes stress, anxiety, motivation, dropout risk.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">فرم هفتگی سلامت، استرس، اضطراب، انگیزه و احتمال ترک تحصیل را تحلیل می‌کند.</p>
+            </div>
+            <!-- Algorithm 3 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">3</span>
+                    <h4 style="font-weight: 600; margin: 0;">Teacher Performance</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Efficiency, exam difficulty, student improvement, homework completion.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">کارآیی، سختی آزمون‌ها، پیشرفت دانش‌آموز و انجام تکالیف.</p>
+            </div>
+            <!-- Algorithm 4 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">4</span>
+                    <h4 style="font-weight: 600; margin: 0;">School Analytics</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">High-risk classes, grades, teachers, attendance trends, heatmaps.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">کلاس‌ها، پایه‌ها و معلمان پرخطر، روند حضور و هیت‌مپ‌ها.</p>
+            </div>
+            <!-- Algorithm 5 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">5</span>
+                    <h4 style="font-weight: 600; margin: 0;">Smart Academic Guidance</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Recommend suitable academic paths based on interests, skills, performance.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">پیشنهاد رشته مناسب بر اساس علایق، مهارت و عملکرد.</p>
+            </div>
+            <!-- Algorithm 6 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">6</span>
+                    <h4 style="font-weight: 600; margin: 0;">Grade Prediction</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Predict next exam score, pass probability, decline probability.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">پیش‌بینی نمره آزمون بعدی، احتمال قبولی و احتمال افت.</p>
+            </div>
+            <!-- Algorithm 7 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">7</span>
+                    <h4 style="font-weight: 600; margin: 0;">Parent Insights</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Best study time, sleep recommendations, weak subjects, activities.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">بهترین زمان مطالعه، توصیه خواب، نقاط ضعف و فعالیت‌ها.</p>
+            </div>
+            <!-- Algorithm 8 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">8</span>
+                    <h4 style="font-weight: 600; margin: 0;">Cheating Detection</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Analyze exam patterns for suspicious similarity and unusual grades.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">تحلیل الگوهای آزمون برای شناسایی شباهت مشکوک و نمرات غیرعادی.</p>
+            </div>
+            <!-- Algorithm 9 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">9</span>
+                    <h4 style="font-weight: 600; margin: 0;">Smart Study Planner</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Automatically generate weekly study plans based on weak subjects.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">تولید خودکار برنامه مطالعاتی هفتگی بر اساس دروس ضعیف.</p>
+            </div>
+            <!-- Algorithm 10 -->
+            <div class="card-surface" style="padding: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span class="badge">10</span>
+                    <h4 style="font-weight: 600; margin: 0;">Comprehensive Analytics</h4>
+                </div>
+                <p class="en" style="color: #94a3b8; font-size: 0.9rem;">Performance by grade, class, teacher, lesson, pass rates, trends.</p>
+                <p class="fa" style="color: #94a3b8; font-size: 0.9rem; display:none;">عملکرد بر اساس پایه، کلاس، معلم، درس، نرخ قبولی و روندها.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TECH STACK ========== -->
+    <section class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">Technology Stack</span>
+            <span class="fa" style="display:none;">فناوری‌های استفاده‌شده</span>
+        </h2>
+        <div class="grid-cards" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+            <!-- React -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="-11.5 -10.23174 23 20.46348" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="0" cy="0" r="2.05" fill="#61dafb"/>
+                    <g stroke="#61dafb" stroke-width="1" fill="none">
+                        <ellipse rx="11" ry="4.2"/>
+                        <ellipse rx="11" ry="4.2" transform="rotate(60)"/>
+                        <ellipse rx="11" ry="4.2" transform="rotate(120)"/>
+                    </g>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">React</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Frontend</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">فرانت‌اند</div>
+            </div>
+            <!-- Vite -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="0 0 410 404" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M399.641 59.5246L215.643 388.545C211.844 395.338 202.084 395.378 198.228 388.618L10.5817 59.5563C6.38087 52.1896 12.6802 43.2665 21.0281 44.7586L205.223 77.6824C206.398 77.8924 207.601 77.8904 208.776 77.6763L389.119 44.8058C397.439 43.2894 403.768 52.1434 399.641 59.5246Z" fill="url(#paint0_linear)"/>
+                    <path d="M292.965 1.5744L156.801 28.2552C154.563 28.6937 152.906 30.5903 152.771 32.8664L144.395 174.33C144.198 177.662 147.258 180.248 150.51 179.498L188.42 170.749C191.967 169.931 195.172 173.055 194.443 176.622L183.182 222.245C182.412 225.994 185.998 229.275 189.735 228.056L211.052 221.082C214.812 219.862 218.403 223.182 217.582 227.012L205.83 275.118C204.929 279.36 210.215 282.67 213.297 279.67L217.172 275.947L312.038 181.012C313.65 179.435 312.435 176.695 310.402 176.701L272.757 176.825C269.434 176.833 266.803 174.155 266.866 170.832L269.092 45.8457C269.156 42.4983 266.6 39.8372 263.253 39.8796L300.918 39.3818C303.518 39.3552 305.035 36.723 303.661 34.4894L298.218 24.7396C296.084 21.2264 293.591 19.3153 292.965 1.5744Z" fill="url(#paint1_linear)"/>
+                    <defs>
+                        <linearGradient id="paint0_linear" x1="6.00017" y1="32.9999" x2="235" y2="344" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#41D1FF"/>
+                            <stop offset="1" stop-color="#BD34FE"/>
+                        </linearGradient>
+                        <linearGradient id="paint1_linear" x1="194.651" y1="8.81818" x2="236.076" y2="292.989" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FFEA83"/>
+                            <stop offset="0.0833333" stop-color="#FFDD35"/>
+                            <stop offset="1" stop-color="#FFA800"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">Vite</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Build Tool</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">ابزار ساخت</div>
+            </div>
+            <!-- TypeScript -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="0 0 24 24" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#3178c6" d="M0 0h24v24H0V0z"/>
+                    <path fill="#fff" d="M20.62 8.65v7.58c0 .52-.08.9-.24 1.15-.15.25-.36.45-.63.6-.27.15-.57.27-.9.36-.33.09-.66.16-1 .21-.33.05-.62.07-.86.07-.27 0-.52-.02-.74-.05-.22-.03-.41-.08-.58-.14v-2.39c.16.05.33.1.51.14.18.04.37.06.57.06.19 0 .36-.02.5-.07.14-.05.25-.12.33-.21.08-.09.12-.22.12-.38v-7.53h2.63zM9.44 18.25v-7.21H7.28v-2.42h7.13v2.42h-2.16v7.21H9.44z"/>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">TypeScript</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Strict Typing</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">تایپ دقیق</div>
+            </div>
+            <!-- Node.js -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="0 0 24 24" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="#8cc84b">
+                    <path d="M12 1.85L21.36 7.5v9L12 22.15 2.64 16.5v-9L12 1.85zm0 2.05L4.64 9.28v5.44L12 20.1l7.36-5.38V9.28L12 3.9zM7.5 13.35c.03 1.37.8 2.26 2.27 2.34.76.04 1.39-.15 1.78-.56.44-.46.67-1.12.7-1.98v-.06c0-.75-.18-1.34-.55-1.76-.36-.42-.94-.65-1.72-.7l-.73-.05c-.3-.02-.53-.09-.68-.21-.15-.13-.23-.34-.23-.62 0-.31.1-.54.28-.7.18-.16.43-.25.75-.25.32 0 .57.08.76.24.2.17.3.41.3.72h1.65c-.04-.57-.2-1.03-.48-1.37-.28-.35-.69-.61-1.22-.78-.52-.17-1.13-.21-1.84-.1-.88.14-1.56.46-2.02.96-.46.5-.7 1.15-.71 1.94 0 .83.18 1.45.54 1.87.37.42.95.66 1.74.74l.78.06c.3.02.53.09.68.2.15.13.23.34.23.63 0 .32-.1.55-.29.71-.2.15-.46.23-.79.23-.35 0-.63-.08-.82-.25-.2-.17-.31-.42-.33-.75H7.5zm2.16 4.66c-.53 0-.94-.15-1.23-.46-.29-.3-.44-.75-.46-1.35h1.65c.01.33.07.56.19.7.13.13.31.2.56.2.28 0 .48-.08.6-.24.13-.15.19-.4.19-.75v-.26h-.06c-.18.24-.45.43-.8.56-.36.14-.74.21-1.16.21-.53 0-.98-.15-1.35-.45-.38-.3-.67-.69-.87-1.17-.2-.48-.3-1.01-.3-1.59 0-.6.1-1.13.31-1.6.21-.47.51-.84.9-1.11.39-.27.85-.41 1.39-.41.42 0 .8.07 1.13.2.34.14.6.33.8.58h.07v-.68h1.62v4.96c0 .65-.1 1.23-.3 1.73-.2.51-.49.9-.87 1.18-.38.28-.83.42-1.35.42z"/>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">Node.js</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Backend</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">بک‌اند</div>
+            </div>
+            <!-- JSON -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="0 0 24 24" width="48" height="48" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#f7df1e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16v16H4z"/>
+                    <path d="M8 10v4"/>
+                    <path d="M12 10v4"/>
+                    <path d="M16 10v4"/>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">JSON Files</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Database</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">پایگاه داده</div>
+            </div>
+            <!-- TailwindCSS -->
+            <div class="card-surface" style="padding: 1rem; text-align: center;">
+                <svg viewBox="0 0 24 24" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#06B6D4" d="M12 6c-3.5 0-5.5 1.5-5.5 4.5 0 2.5 1.5 4 4.5 4.5 1.5.25 2.5.75 2.5 2 0 1.25-1.25 2-3.5 2-1.5 0-2.75-.25-3.75-.75v2.25c.75.25 2 .5 3.75.5 3.5 0 5.5-1.5 5.5-4.5 0-2.5-1.5-4-4.5-4.5-1.5-.25-2.5-.75-2.5-2 0-1.25 1.25-2 3.5-2 1.5 0 2.75.25 3.75.75V6.75C13.25 6.5 12 6 10.5 6H12z"/>
+                </svg>
+                <div style="font-weight: 600; margin-top: 0.5rem;">TailwindCSS</div>
+                <div class="en" style="color: #94a3b8; font-size: 0.85rem;">Styling</div>
+                <div class="fa" style="color: #94a3b8; font-size: 0.85rem; display:none;">استایل‌دهی</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== INSTALLATION ========== -->
+    <section class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">Installation Wizard</span>
+            <span class="fa" style="display:none;">دستیار نصب</span>
+        </h2>
+        <div class="card-surface" style="padding: 1.5rem;">
+            <p class="en" style="margin-bottom: 1rem;">The first-run experience guides you through 8 steps to set up the school:</p>
+            <p class="fa" style="margin-bottom: 1rem; display:none;">اولین اجرا شما را در ۸ مرحله برای راه‌اندازی مدرسه راهنمایی می‌کند:</p>
+            <ol class="en" style="color: #94a3b8; line-height: 1.8; padding-left: 1.5rem;">
+                <li>Administrator account</li>
+                <li>Create grades (min 2)</li>
+                <li>Create classes per grade</li>
+                <li>Add lessons with importance (3-10)</li>
+                <li>Consultants</li>
+                <li>Students (auto parent account)</li>
+                <li>Teachers with assignments</li>
+                <li>Finish & generate access codes</li>
+            </ol>
+            <ol class="fa" style="color: #94a3b8; line-height: 1.8; padding-left: 1.5rem; display:none;">
+                <li>حساب مدیر</li>
+                <li>ایجاد پایه‌ها (حداقل ۲)</li>
+                <li>ایجاد کلاس‌ها برای هر پایه</li>
+                <li>افزودن دروس با درجه اهمیت (۳-۱۰)</li>
+                <li>مشاوران</li>
+                <li>دانش‌آموزان (ساخت خودکار حساب والدین)</li>
+                <li>معلمان و تخصیص‌ها</li>
+                <li>پایان و تولید کدهای دسترسی</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ========== GITHUB SECTION ========== -->
+    <section id="github" class="container" style="padding: 2rem 0;">
+        <h2 class="section-title">
+            <span class="en">GitHub Repository</span>
+            <span class="fa" style="display:none;">مخزن گیت‌هاب</span>
+        </h2>
+        <div class="card-surface" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <a href="https://github.com/shayanghad0/sip" target="_blank" style="color: #93c5fd; font-weight: 600; text-decoration: none;">github.com/shayanghad0/sip</a>
+                </div>
+                <span class="badge">Branch: kharazmi</span>
+            </div>
+        </div>
+
+        <!-- Last Commit + Commits List -->
+        <div class="grid-cards" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="card-surface" style="padding: 1.5rem;">
+                <h3 style="font-weight: 600; margin-bottom: 1rem;">
+                    <span class="en">Last Commit</span>
+                    <span class="fa" style="display:none;">آخرین کامیت</span>
+                </h3>
+                <div id="last-commit" style="min-height: 100px;">
+                    <div class="skeleton" style="height: 80px;"></div>
+                </div>
+            </div>
+            <div class="card-surface" style="padding: 1.5rem;">
+                <h3 style="font-weight: 600; margin-bottom: 1rem;">
+                    <span class="en">Recent Commits</span>
+                    <span class="fa" style="display:none;">کامیت‌های اخیر</span>
+                </h3>
+                <div id="commit-list" style="min-height: 150px;">
+                    <div class="skeleton" style="height: 30px; margin-bottom: 8px;"></div>
+                    <div class="skeleton" style="height: 30px; margin-bottom: 8px;"></div>
+                    <div class="skeleton" style="height: 30px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Tree -->
+        <div class="card-surface" style="padding: 1.5rem; margin-top: 1.5rem;">
+            <h3 style="font-weight: 600; margin-bottom: 1rem;">
+                <span class="en">Project Files</span>
+                <span class="fa" style="display:none;">فایل‌های پروژه</span>
+            </h3>
+            <div id="file-tree" style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.75rem; overflow-x: auto; font-family: monospace; font-size: 0.85rem;">
+                <div class="skeleton" style="height: 100px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer style="border-top: 1px solid rgba(148,163,184,0.1); margin-top: 3rem; padding: 2rem 0;">
+        <div class="container" style="text-align: center; color: #64748b; font-size: 0.85rem;">
+            <div>
+                <span class="en">School Intelligence Platform — Built for Khwarazmi Festival · Programming Section</span>
+                <span class="fa" style="display:none;">سیپ - سامانه یکپارچه پیشرفت دانش آموزی — ساخته شده برای جشنواره خوارزمی · بخش برنامه‌نویسی</span>
+            </div>
+            <div style="margin-top: 0.5rem;">
+                <a href="https://github.com/shayanghad0/sip" target="_blank" style="color: #93c5fd; text-decoration: none;">GitHub</a>
+                ·
+                <a href="https://github.com/shayanghad0/SIP/commits/kharazmi/" target="_blank" style="color: #93c5fd; text-decoration: none;">Commits</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // Language toggle
+        let currentLang = 'en'; // default
+
+        function toggleLanguage() {
+            const enEls = document.querySelectorAll('.en');
+            const faEls = document.querySelectorAll('.fa');
+            const dirAttr = document.documentElement.getAttribute('dir');
+
+            if (currentLang === 'en') {
+                currentLang = 'fa';
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.setAttribute('lang', 'fa');
+                enEls.forEach(el => el.style.display = 'none');
+                faEls.forEach(el => el.style.display = '');
+            } else {
+                currentLang = 'en';
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.documentElement.setAttribute('lang', 'en');
+                enEls.forEach(el => el.style.display = '');
+                faEls.forEach(el => el.style.display = 'none');
+            }
+        }
+
+        // GitHub API functions
+        async function fetchCommitData() {
+            const repo = 'shayanghad0/SIP';
+            const branch = 'kharazmi';
+            try {
+                const commitsRes = await fetch(`https://api.github.com/repos/${repo}/commits?sha=${branch}&per_page=10`);
+                if (!commitsRes.ok) throw new Error('Failed to fetch commits');
+                const commits = await commitsRes.json();
+
+                // Last commit
+                const lastCommitContainer = document.getElementById('last-commit');
+                if (commits.length > 0) {
+                    const last = commits[0];
+                    lastCommitContainer.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="commit-avatar">${last.commit.author.name.charAt(0).toUpperCase()}</div>
+                            <div class="commit-meta">
+                                <div class="commit-message">${escapeHtml(last.commit.message.split('\n')[0])}</div>
+                                <div class="commit-author">${escapeHtml(last.commit.author.name)}</div>
+                                <div class="commit-date">${new Date(last.commit.author.date).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: #94a3b8;">SHA: <code>${last.sha.substring(0,7)}</code></div>
+                    `;
+                } else {
+                    lastCommitContainer.innerHTML = '<div class="en">No commits found.</div><div class="fa" style="display:none;">کامیتی یافت نشد.</div>';
+                }
+
+                // Commit list (skip first if already shown)
+                const listContainer = document.getElementById('commit-list');
+                if (commits.length > 1) {
+                    let html = '';
+                    for (let i = 1; i < Math.min(commits.length, 8); i++) {
+                        const c = commits[i];
+                        html += `
+                            <div class="commit-item">
+                                <div class="commit-avatar">${c.commit.author.name.charAt(0).toUpperCase()}</div>
+                                <div class="commit-meta">
+                                    <div class="commit-message">${escapeHtml(c.commit.message.split('\n')[0])}</div>
+                                    <div class="commit-author">${escapeHtml(c.commit.author.name)}</div>
+                                    <div class="commit-date">${new Date(c.commit.author.date).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    listContainer.innerHTML = html;
+                } else {
+                    listContainer.innerHTML = '<div class="en">No more commits.</div><div class="fa" style="display:none;">کامیت دیگری نیست.</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching commits:', error);
+                document.getElementById('last-commit').innerHTML = '<div class="en">Unable to load commit data.</div><div class="fa" style="display:none;">خطا در دریافت اطلاعات کامیت.</div>';
+                document.getElementById('commit-list').innerHTML = '';
+            }
+        }
+
+        async function fetchFileTree() {
+            const repo = 'shayanghad0/SIP';
+            const branch = 'kharazmi';
+            try {
+                const treeRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${branch}?recursive=1`);
+                if (!treeRes.ok) throw new Error('Failed to fetch tree');
+                const treeData = await treeRes.json();
+                if (treeData.tree) {
+                    const files = treeData.tree.filter(item => item.type === 'blob').map(item => item.path).sort();
+                    const dirs = new Set();
+                    files.forEach(path => {
+                        const parts = path.split('/');
+                        if (parts.length > 1) dirs.add(parts[0] + '/');
+                    });
+                    const rootFiles = files.filter(path => !path.includes('/'));
+
+                    // Build tree HTML with SVG icons
+                    let treeHtml = '';
+                    dirs.forEach(dir => {
+                        treeHtml += `<div class="file-tree-item"><span class="folder-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span><span style="color: #93c5fd;">${escapeHtml(dir)}</span></div>`;
+                        const dirFiles = files.filter(f => f.startsWith(dir) && f !== dir);
+                        dirFiles.forEach(f => {
+                            const parts = f.split('/');
+                            const indentLevel = parts.length - 1;
+                            const indent = '<span class="file-tree-indent" style="width:' + (indentLevel * 1.2) + 'rem;"></span>';
+                            const name = parts.pop();
+                            treeHtml += `<div class="file-tree-item">${indent}<span class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span>${escapeHtml(name)}</span></div>`;
+                        });
+                    });
+                    rootFiles.forEach(f => {
+                        treeHtml += `<div class="file-tree-item"><span class="file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span>${escapeHtml(f)}</span></div>`;
+                    });
+                    document.getElementById('file-tree').innerHTML = treeHtml || '<div class="en">No files found.</div><div class="fa" style="display:none;">فایلی یافت نشد.</div>';
+                } else {
+                    document.getElementById('file-tree').innerHTML = '<div class="en">No files found.</div><div class="fa" style="display:none;">فایلی یافت نشد.</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching file tree:', error);
+                document.getElementById('file-tree').innerHTML = '<div class="en">Unable to load file tree.</div><div class="fa" style="display:none;">خطا در دریافت ساختار فایل.</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCommitData();
+            fetchFileTree();
+        });
+    </script>
+</body>
+</html>
