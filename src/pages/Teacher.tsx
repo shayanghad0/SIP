@@ -27,11 +27,11 @@ import { cn } from "../utils/cn";
 
 const NAV: NavItem[] = [
   { key: "overview", label: "نمای کلی", icon: LayoutDashboard },
+  { key: "students", label: "دانش‌آموزان من", icon: Users },
+  { key: "behavior", label: "گزارش رفتاری", icon: ScrollText },
   { key: "attendance", label: "حضور و غیاب", icon: CalendarCheck },
   { key: "homeworks", label: "تکالیف", icon: ClipboardList },
   { key: "exams", label: "آزمون‌ها و نمرات", icon: BookOpen },
-  { key: "behavior", label: "گزارش رفتاری", icon: ScrollText },
-  { key: "students", label: "دانش‌آموزان من", icon: Users },
 ];
 
 export default function TeacherDashboard({ section }: { section: string }) {
