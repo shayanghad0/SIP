@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Bell, BarChart3, Database, Gauge, GraduationCap, HeartHandshake, LayoutDashboard, RotateCcw, Settings, ShieldCheck, Users, UserPlus, Edit } from "lucide-react";
+import { Activity, AlertTriangle, Bell, BarChart3, Database, Gauge, GraduationCap, HeartHandshake, LayoutDashboard, RotateCcw, Settings, ShieldCheck, Trash, Users, UserPlus, Edit } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,6 +10,8 @@ import {
   addStudentRecord,
   addTeacherRecord,
   consultantsList,
+  deleteStudentRecord,
+  deleteTeacherRecord,
   healthDetail,
   loadDemoData,
   markAlertRead,
@@ -355,6 +357,19 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
                         <Button variant="ghost" className="px-3 py-1.5 text-[12px]" onClick={() => setEditStudent(r.student)}>
                           <Edit size={14} />
                         </Button>
+                        <Button variant="ghost" className="px-3 py-1.5 text-[12px] text-rose-400 hover:text-rose-300" onClick={async () => {
+                          if (window.confirm(`آیا از حذف «${r.student.fullName}» و حساب والدین مطمئن هستید؟`)) {
+                            try {
+                              await deleteStudentRecord(r.student.id);
+                              notify.success("دانش‌آموز و حساب والدین حذف شد");
+                              studentsList().then(setRows);
+                            } catch (e: any) {
+                              notify.error(e?.message ?? "خطا در حذف");
+                            }
+                          }
+                        }}>
+                          <Trash size={14} />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -638,6 +653,19 @@ function Teachers() {
                 </Badge>
                 <Button variant="ghost" className="px-2 py-1" onClick={() => setEditTeacher(t.teacher)}>
                   <Edit size={14} />
+                </Button>
+                <Button variant="ghost" className="px-2 py-1 text-rose-400 hover:text-rose-300" onClick={async () => {
+                  if (window.confirm(`آیا از حذف دبیر «${t.teacher.fullName}» مطمئن هستید؟`)) {
+                    try {
+                      await deleteTeacherRecord(t.teacher.id);
+                      notify.success("دبیر حذف شد");
+                      teachersList().then(setRows);
+                    } catch (e: any) {
+                      notify.error(e?.message ?? "خطا در حذف");
+                    }
+                  }
+                }}>
+                  <Trash size={14} />
                 </Button>
               </div>
             </div>

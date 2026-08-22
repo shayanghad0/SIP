@@ -1098,6 +1098,67 @@ export async function updateTeacherRecord(teacherId: string, payload: {
   recompute();
 }
 
+/* ================= admin delete student/teacher ================= */
+
+export async function deleteStudentRecord(studentId: string): Promise<void> {
+  const studentsFile = readDb<StudentsFile>("students");
+  const student = studentsFile.students.find((s) => s.id === studentId);
+  if (!student) throw new Error("دانش‌آموز یافت نشد");
+  // Remove student
+  updateDb<StudentsFile>("students", (d) => ({
+    ...d,
+    students: d.students.filter((s) => s.id !== studentId),
+    attendance: d.attendance.filter((a) => a.studentId !== studentId),
+    homeworkSubmissions: d.homeworkSubmissions.filter((s) => s.studentId !== studentId),
+    behaviorReports: d.behaviorReports.filter((r) => r.studentId !== studentId),
+  }));
+  // Remove parent linked to this student
+  updateDb<ParentsFile>("parents", (d) => ({
+    ...d,
+    parents: d.parents.filter((p) => p.studentId !== studentId),
+  }));
+  // Remove exam scores
+  updateDb<GradesFile>("grades", (d) => ({
+    ...d,
+    examScores: d.examScores.filter((s) => s.studentId !== studentId),
+  }));
+  // Remove notes, wellness forms, alerts
+  updateDb<NotesFile>("notes", (d) => ({
+    ...d,
+    notes: d.notes.filter((n) => n.studentId !== studentId),
+    wellnessForms: d.wellnessForms.filter((w) => w.studentId !== studentId),
+    alerts: d.alerts.filter((a) => a.studentId !== studentId),
+  }));
+  // Remove AI analyses, study plans, cheating flags, guidance
+  updateDb<AiFile>("ai-analysis", (d) => ({
+    ...d,
+    analyses: d.analyses.filter((a) => a.studentId !== studentId),
+    studyPlans: d.studyPlans.filter((p) => p.studentId !== studentId),
+    cheatingFlags: d.cheatingFlags.filter((f) => !f.studentIds.includes(studentId)),
+    guidance: Object.fromEntries(Object.entries(d.guidance).filter(([k]) => k !== studentId)),
+  }));
+  logActivity("admin", "مدیر", `دانش‌آموز «${student.fullName}» و حساب والدین حذف شد`);
+  recompute();
+}
+
+export async function deleteTeacherRecord(teacherId: string): Promise<void> {
+  const teachersFile = readDb<TeachersFile>("teachers");
+  const teacher = teachersFile.teachers.find((t) => t.id === teacherId);
+  if (!teacher) throw new Error("دبیر یافت نشد");
+  // Remove teacher
+  updateDb<TeachersFile>("teachers", (d) => ({
+    ...d,
+    teachers: d.teachers.filter((t) => t.id !== teacherId),
+  }));
+  // Remove teacher analytics
+  updateDb<AiFile>("ai-analysis", (d) => ({
+    ...d,
+    teacherAnalytics: d.teacherAnalytics.filter((a) => a.teacherId !== teacherId),
+  }));
+  logActivity("admin", "مدیر", `دبیر «${teacher.fullName}» حذف شد`);
+  recompute();
+}
+
 /* ================= teacher ================= */
 
 export interface TeacherClassView {
