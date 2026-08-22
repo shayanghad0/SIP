@@ -13,8 +13,6 @@ import ConsultantDashboard from "./pages/Consultant";
 import ParentDashboard from "./pages/Parent";
 import StudentDashboard from "./pages/Student";
 import Profile from "./pages/Profile";
-import { HomePage } from "./pages/HomePage";
-import { UptimePage } from "./pages/Uptime";
 
 function PageTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -47,9 +45,9 @@ function BootScreen() {
 function RootRedirect() {
   const { ready, installed, session } = useSession();
   if (!ready) return <BootScreen />;
-  if (!installed) return <HomePage />;
+  if (!installed) return <Navigate to="/install" replace />;
   if (session) return <Navigate to="/dashboard" replace />;
-  return <HomePage />;
+  return <Navigate to="/login" replace />;
 }
 
 function InstallRoute() {
@@ -103,13 +101,12 @@ function AppInner() {
     <HashRouter>
       <PageTransition>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/install" element={<InstallRoute />} />
           <Route path="/login" element={<LoginRoute />} />
           <Route path="/dashboard" element={<DashboardRoute />} />
           <Route path="/dashboard/:section" element={<DashboardRoute />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/uptime" element={<UptimePage />} />
           <Route path="/forbidden" element={<Forbidden />} />
           <Route path="/error" element={<ServerError />} />
           <Route path="*" element={<NotFound />} />
