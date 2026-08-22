@@ -787,7 +787,7 @@ export async function teachersList(): Promise<TeacherRow[]> {
   return teachers.map((t) => ({
     teacher: t,
     assignments: t.assignments.map((a) => `${L.lessonName(a.lessonId)} — ${L.classLabel(a.classId)}`),
-    analytics: ai.teacherAnalytics.find((x) => x.teacherId === t.id) ?? { teacherId: t.id, classCount: 0, studentCount: 0, avgScore: 0, improvement: 0, difficultyIndex: 50, homeworkCompletion: 80, efficiency: 50 },
+    analytics: ai.teacherAnalytics.find((x) => x.teacherId === t.id) ?? { teacherId: t.id, classCount: 0, studentCount: 0, avgScore: 0, improvement: 0, difficultyIndex: 0, homeworkCompletion: 0, efficiency: 0 },
   }));
 }
 

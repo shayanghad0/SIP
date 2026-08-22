@@ -460,21 +460,24 @@ export function computeTeacherAnalytics(
       ? (relevantSubs.filter((s) => s.completed).length / relevantSubs.length) * 100
       : 80;
 
-  const difficultyIndex = values.length > 0 ? clamp((1 - avgScore / MAX_SCORE) * 100, 0, 100) : 50;
-  const efficiency = clamp(
-    0.4 * (avgScore / MAX_SCORE) * 100 + 0.3 * clamp(50 + slope * 12, 0, 100) + 0.3 * homeworkCompletion,
-    0,
-    100,
-  );
+  const hasAnyData = values.length > 0 || relevantSubs.length > 0;
+  const difficultyIndex = hasAnyData ? clamp((1 - avgScore / MAX_SCORE) * 100, 0, 100) : 0;
+  const efficiency = hasAnyData
+    ? clamp(
+        0.4 * (avgScore / MAX_SCORE) * 100 + 0.3 * clamp(50 + slope * 12, 0, 100) + 0.3 * homeworkCompletion,
+        0,
+        100,
+      )
+    : 0;
 
   return {
     teacherId: teacher.id,
-    classCount: classIds.size,
-    studentCount: students.length,
-    avgScore,
-    improvement: slope,
+    classCount: hasAnyData ? classIds.size : 0,
+    studentCount: hasAnyData ? students.length : 0,
+    avgScore: hasAnyData ? avgScore : 0,
+    improvement: hasAnyData ? slope : 0,
     difficultyIndex,
-    homeworkCompletion,
+    homeworkCompletion: hasAnyData ? homeworkCompletion : 0,
     efficiency,
   };
 }
