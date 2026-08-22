@@ -1,4 +1,4 @@
-import { BrainCircuit, LogOut, Menu, User, X, type LucideIcon } from "lucide-react";
+import { BrainCircuit, LogOut, Menu, UserCircle, X, type LucideIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../utils/cn";
@@ -58,6 +58,18 @@ export function AppShell({ role, userName, nav, section, onNavigate, onLogout, c
           </button>
         ))}
       </nav>
+      <div className="px-3 pb-2">
+        <button
+          onClick={() => { navigate("/profile"); setMobileOpen(false); }}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-medium transition-all cursor-pointer",
+            "border border-transparent text-slate-400 hover:bg-white/5 hover:text-slate-200",
+          )}
+        >
+          <UserCircle size={17} className="text-slate-500" />
+          پروفایل کاربری
+        </button>
+      </div>
       <div className="border-t border-slate-800/80 p-4">
         <div className="flex items-center gap-3">
           <button
