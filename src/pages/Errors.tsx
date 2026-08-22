@@ -104,7 +104,7 @@ function Cube3D() {
 function ErrorCard({ code, title, desc, icon, children }: { code: string; title: string; desc: string; icon: ReactNode; children?: ReactNode }) {
   return (
     <div className="relative z-10 mx-auto max-w-md rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 p-8 shadow-2xl shadow-black/30 backdrop-blur-lg">
-      <div className="absolute -left-4 -top-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-500/30 bg-blue-500/10 text-blue-400">
+      <div className="absolute -left-4 -top-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-500/30 bg-blue-500/10 text-blue-400 shadow-lg shadow-blue-500/20">
         {icon}
       </div>
       <div className="mt-8">
@@ -158,8 +158,8 @@ export function NotFound() {
       code="404"
       title="صفحه یافت نشد"
       desc="آدرسی که به دنبال آن هستید وجود ندارد یا به مکان دیگری منتقل شده است."
-      icon={<SearchX size={34} />}
-    />
+      icon={<SearchX size={24} />}
+    ></ErrorPage>
   );
 }
 
@@ -168,9 +168,9 @@ export function Forbidden() {
     <ErrorPage
       code="403"
       title="دسترسی محدود"
-      desc="حساب کاربری شما مجوز مشاهده این بخش را ندارد. این صفحه فقط برای نقش‌های مجاز قابل دسترسی است."
-      icon={<Ban size={34} />}
-    />
+      desc="حساب کاربری شما مجوز مشاهده این بخش را ندارد. این صفحه فقط برای نقشهای مجاز قابل دسترسی است."
+      icon={<Ban size={24} />}
+    ></ErrorPage>
   );
 }
 
@@ -180,8 +180,8 @@ export function ServerError() {
       code="500"
       title="خطای سرور"
       desc="مشکلی در پردازش درخواست شما پیش آمد. لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید."
-      icon={<ServerCrash size={34} />}
-    />
+      icon={<ServerCrash size={24} />}
+    ></ErrorPage>
   );
 }
 
@@ -209,8 +209,8 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, BoundarySt
           code="500"
           title="خطای غیرمنتظره"
           desc="مشکلی در نمایش این صفحه رخ داد. لطفاً صفحه را بارگذاری مجدد کنید."
-          icon={<Fingerprint size={34} />}
-        />
+          icon={<Fingerprint size={24} />}
+        ></ErrorPage>
       );
     }
     return this.props.children;
