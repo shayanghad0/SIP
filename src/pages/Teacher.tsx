@@ -5,11 +5,9 @@ import {
   addBehavior,
   addExam,
   addHomework,
-  classOptions,
   examScoresOf,
   existingAttendance,
   homeworksOfClass,
-  lessonOptions,
   saveAttendance,
   saveExamScores,
   studentsOfClass,
@@ -69,8 +67,8 @@ export default function TeacherDashboard({ section }: { section: string }) {
         <>
           {activeSection === "overview" && <Overview data={data} onOpenReport={setReportFor} />}
           {activeSection === "attendance" && <Attendance assignments={assignments} onSaved={reload} />}
-          {activeSection === "homeworks" && <Homeworks onSaved={reload} />}
-          {activeSection === "exams" && <Exams onSaved={reload} />}
+          {activeSection === "homeworks" && <Homeworks assignments={assignments} onSaved={reload} />}
+          {activeSection === "exams" && <Exams assignments={assignments} onSaved={reload} />}
           {activeSection === "behavior" && <Behavior assignments={assignments} onSaved={reload} />}
           {activeSection === "students" && <MyStudents data={data} onOpenReport={setReportFor} />}
         </>
@@ -254,10 +252,10 @@ function Attendance({ assignments, onSaved }: { assignments: AssignView[]; onSav
 
 /* ================= homeworks ================= */
 
-function Homeworks({ onSaved }: { onSaved: () => void }) {
+function Homeworks({ assignments, onSaved }: { assignments: AssignView[]; onSaved: () => void }) {
   const teacher = useSession().session;
-  const lessons = lessonOptions();
-  const classes = classOptions();
+  const lessons = [...new Map(assignments.map((a) => [a.lessonId, { id: a.lessonId, name: a.lessonName }])).values()];
+  const classes = [...new Map(assignments.map((a) => [a.classId, { classId: a.classId, label: a.classLabel }])).values()];
   const [lessonId, setLessonId] = useState("");
   const [classId, setClassId] = useState("");
   const [title, setTitle] = useState("");
@@ -360,10 +358,10 @@ function Homeworks({ onSaved }: { onSaved: () => void }) {
 
 /* ================= exams ================= */
 
-function Exams({ onSaved }: { onSaved: () => void }) {
+function Exams({ assignments, onSaved }: { assignments: AssignView[]; onSaved: () => void }) {
   const teacher = useSession().session;
-  const lessons = lessonOptions();
-  const classes = classOptions();
+  const lessons = [...new Map(assignments.map((a) => [a.lessonId, { id: a.lessonId, name: a.lessonName }])).values()];
+  const classes = [...new Map(assignments.map((a) => [a.classId, { classId: a.classId, label: a.classLabel }])).values()];
   const [name, setName] = useState("");
   const [lessonId, setLessonId] = useState("");
   const [classId, setClassId] = useState("");
