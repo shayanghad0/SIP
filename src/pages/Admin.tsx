@@ -18,6 +18,7 @@ import {
   loadDemoData,
   markAlertRead,
   parentsList,
+  resetUserData,
   schoolAnalyticsFull,
   studentsList,
   systemReset,
@@ -995,7 +996,24 @@ function SettingsSection() {
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded-xl border border-amber-500/25 bg-amber-500/5 p-4">
               <div>
-                <p className="text-[13px] font-medium text-amber-200">بازنشانی کامل سامانه</p>
+                <p className="text-[13px] font-medium text-amber-200">ریست داده سایت</p>
+                <p className="mt-0.5 text-[11.5px] text-slate-400">حذف همه کاربران (دانش‌آموز، والدین، دبیر، مشاور) و تحلیل‌ها — ساختار مدرسه حفظ می‌شود.</p>
+              </div>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  if (window.confirm("آیا از ریست داده‌ها مطمئن هستید؟ همه کاربران و تحلیل‌ها حذف می‌شوند اما نیازی به نصب مجدد نیست.")) {
+                    resetUserData();
+                    notify.success("داده‌ها ریست شد — ساختار مدرسه حفظ شد");
+                  }
+                }}
+              >
+                <Trash size={14} /> ریست داده‌ها
+              </Button>
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-red-500/25 bg-red-500/5 p-4">
+              <div>
+                <p className="text-[13px] font-medium text-red-200">بازنشانی کامل سامانه</p>
                 <p className="mt-0.5 text-[11.5px] text-slate-400">همه فایل‌های JSON پاک و نصب مجدد فعال می‌شود.</p>
               </div>
               <Button

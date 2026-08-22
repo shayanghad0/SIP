@@ -1017,6 +1017,26 @@ export function systemReset(): void {
   clearToken();
 }
 
+export function resetUserData(): void {
+  /* Clear all students + related academic data */
+  writeDb<StudentsFile>("students", { students: [], attendance: [], homeworks: [], homeworkSubmissions: [], behaviorReports: [] });
+  /* Clear all parents */
+  writeDb<ParentsFile>("parents", { parents: [] });
+  /* Clear all teachers */
+  writeDb<TeachersFile>("teachers", { teachers: [] });
+  /* Clear all consultants */
+  writeDb<ConsultantsFile>("consultants", { consultants: [] });
+  /* Clear grades exams/scores but keep grade structure and classes */
+  const grades = readDb<GradesFile>("grades");
+  writeDb<GradesFile>("grades", { ...grades, exams: [], examScores: [] });
+  /* Clear all notes, wellness, alerts, activity */
+  writeDb<NotesFile>("notes", { notes: [], wellnessForms: [], alerts: [], activity: [] });
+  /* Clear all AI analysis data */
+  writeDb<AiFile>("ai-analysis", { analyses: [], studyPlans: [], teacherAnalytics: [], cheatingFlags: [], guidance: {} });
+  logActivity("admin", "مدیر", "تمام داده‌های کاربران و تحلیل‌ها پاک شد");
+  recompute();
+}
+
 export function healthDetail(): { files: { file: string; ok: boolean; bytes: number }[]; backups: number; totalBytes: number } {
   return dbHealth();
 }
