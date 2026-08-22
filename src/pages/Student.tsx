@@ -11,10 +11,10 @@ import { PlanView, StudyPlanGrid, TrendLine, COLORS } from "./shared";
 
 const NAV: NavItem[] = [
   { key: "overview", label: "نمای کلی", icon: Home },
-  { key: "grades", label: "نمرات و پیش‌بینی", icon: BookOpen },
   { key: "homeworks", label: "تکالیف", icon: ClipboardList },
   { key: "plan", label: "برنامه مطالعاتی", icon: Sparkles },
   { key: "wellness", label: "فرم سلامت روان", icon: Brain },
+  { key: "grades", label: "نمرات و پیش‌بینی", icon: BookOpen },
   { key: "achievements", label: "دستاوردها", icon: Award },
 ];
 
