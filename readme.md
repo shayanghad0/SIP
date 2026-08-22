@@ -1,221 +1,221 @@
 # 🎓 School Intelligence Platform (SIP)
 
-> **سامانه هوشمند مدیریت، تحلیل و پیش‌بینی وضعیت دانش‌آموز**
+> **Smart School Management, Analysis and Prediction System**
 >
-> یک سامانه تصمیم‌یار آموزشی که مشکلات واقعی مدارس را با **الگوریتم** حل می‌کند؛ نه صرفاً یک سیستم حضور و غیاب و ثبت نمره.
-> پروژه‌ی مسابقه‌ی **جشنواره خوارزمی** — ساختار مهندسی سطح سازمانی (Enterprise).
+> An educational decision-making system that solves real school problems with **algorithms** - not just an attendance and grading system.
+> Khwarazmi Festival competition project - Enterprise-level engineering structure.
 
 ---
 
-## 📖 معرفی
+## 📖 Introduction
 
-SIP با تحلیل داده‌های تحصیلی (نمرات، حضور، تکالیف، رفتار) و سلامت روان (فرم هفتگی ۸ سؤالی) برای **هر دانش‌آموز** یک **Risk Score** از ۰ تا ۱۰۰ محاسبه می‌کند، افت تحصیلی را **قبل از کارنامه** تشخیص می‌دهد، نمره‌ی آزمون بعدی را **پیش‌بینی** می‌کند، **برنامه مطالعاتی شخصی** تولید می‌کند و به‌طور خودکار مشاور، مدیر و والدین را در جریان هشدارها قرار می‌دهد.
+SIP calculates a **Risk Score** from 0 to 100 for **each student** by analyzing academic data (grades, attendance, homework, behavior) and mental health (weekly 8-question form). It detects academic decline **before the report card**, **predicts** the next exam score, generates **personalized study plans**, and automatically notifies consultants, administrators, and parents about alerts.
 
-## 👥 نقش‌ها و داشبوردها
+## 👥 Roles and Dashboards
 
-| نقش | امکانات کلیدی |
+| Role | Key Features |
 |---|---|
-| 👨‍ مدیر | آمار کل، نمادهارت پایه×درس، دانش‌آموزان/دبیران پرخطر، تشخیص تقلب، سلامت سیستم، تنظیمات |
-| 👨‍ دبیر | کلاس‌ها، حضور و غیاب، تکالیف، آزمون و نمرات، گزارش رفتاری، گزارش هوشمند دانش‌آموز |
-| 👩‍💼 مشاور | دانش‌آموزان پرخطر + دلایل، فرم‌های سلامت روان، تایم‌لاین، ثبت یادداشت، پیشنهادهای AI |
-| 👨‍‍👧 والدین | پیشرفت فرزند، حضور، تکالیف، هشدارها، گزارش هفتگی هوشمند، بهترین زمان مطالعه، توصیه خواب |
-| 👨‍🎓 دانش‌آموز | نمرات + پیش‌بینی، تکالیف، برنامه مطالعاتی هفتگی، فرم سلامت روان، دستاوردها، هدایت تحصیلی |
+| 👨 Admin | Overall statistics, grade×lesson heatmaps, high-risk students/teachers, cheating detection, system health, settings |
+| 👨 Teacher | Classes, attendance, homework, exams and grades, behavioral reports, student smart reports |
+| 👩💼 Consultant | High-risk students + reasons, mental health forms, timeline, note taking, AI suggestions |
+| 👨👧 Parent | Child's progress, attendance, homework, alerts, weekly smart reports, best study time, sleep recommendations |
+| 👨🎓 Student | Grades + predictions, homework, weekly study plans, mental health forms, achievements, academic guidance |
 
 ---
 
-## 🛠 فناوری‌ها (محدود به موارد مجاز)
+## 🛠 Technologies (Limited to Allowed)
 
-- **Frontend:** React + Vite + TypeScript (سخت‌گیرانه)
-- **Backend:** Node.js + Express + TypeScript (قرارداد REST — در این بیلد نمایشی، همان قرارداد توسط آداپتور داخل‌مرورگر روی لایه‌ی JSON Database Manager سرو می‌شود تا اپلیکیشن به‌صورت یک فایل استاتیک قابل اجرا باشد)
-- **پایگاه داده:** **فقط فایل‌های JSON** — بدون MySQL/PostgreSQL/SQLite/MongoDB/Firebase/Supabase/Prisma/ORM/Redis
-- **Styling:** TailwindCSS (مورد انتخاب)
+- **Frontend:** React + Vite + TypeScript (strict)
+- **Backend:** Node.js + Express + TypeScript (REST contract - in this demo build, the same contract is served by an in-browser adapter on the JSON Database Manager layer so the application can run as a single static file)
+- **Database:** **JSON files only** - no MySQL/PostgreSQL/SQLite/MongoDB/Firebase/Supabase/Prisma/ORM/Redis
+- **Styling:** TailwindCSS (chosen)
 - **Icons:** lucide-react | **Charts:** Recharts | **Notifications:** react-hot-toast
-- **Forms:** react-hook-form | **Routing:** React Router (مسیریابی با URL path)
+- **Forms:** react-hook-form | **Routing:** React Router (URL path routing)
 
-## 🚀 راه‌اندازی (Installation)
+## 🚀 Setup (Installation)
 
 ```bash
-# نصب وابستگی‌ها
+# Install dependencies
 npm install
 
-# اجرای توسعه
+# Development run
 npm run dev
 
-# بیلد تولید
-npm run build        # خروجی در dist/
-npm run preview      # پیش‌نمایش بیلد
+# Production build
+npm run build        # Output in dist/
+npm run preview      # Preview build
 ```
 
-**اولین اجرا:** چون `database/admin.json` خالی است، سامانه شما را به‌طور خودکار به **`/install`** می‌برد. قبل از نصب هیچ‌کس نمی‌تواند وارد شود.
+**First Run:** Since `database/admin.json` is empty, the system will automatically redirect you to **`/install`**. No one can log in before installation.
 
-### مسیرهای URL
+### URL Paths
 
-| مسیر | توضیح |
+| Path | Description |
 |---|---|
-| `/install` | دستیار نصب ۸ مرحله‌ای (فقط تا قبل از ساخت مدیر) |
-| `/login` | ورود با نام کاربری + رمز + **کد دسترسی** (تشخیص خودکار نقش) |
-| `/dashboard/:section` | داشبورد هر نقش با زیربخش‌ها (overview, students, alerts, …) |
-| `/forbidden` ، `/error` ، ۴۰ | صفحات خطا |
+| `/install` | 8-step installation wizard (only until admin is created) |
+| `/login` | Login with username + password + **access code** (auto role detection) |
+| `/dashboard/:section` | Role dashboard with subsections (overview, students, alerts, ...) |
+| `/forbidden`, `/error`, 404 | Error pages |
 
 ---
 
-## 🏗 معماری (Architecture)
+## 🏗 Architecture
 
 ```
 ┌────────────────────────── React (Vite/TS) ──────────────────────────┐
 │  Pages (Install/Login/Admin/Teacher/Consultant/Parent/Student)      │
 │  Components (UI kit, Layout, Charts)      Hooks (Session context)   │
 ├─────────────────────────────────────────────────────────────────────┤
-│  Service Layer  (src/lib/api.ts)  ← قرارداد REST یکپارچه           │
-│  • احراز هویت (JWT/HS256 + SHA-256 + Access Code)                  │
-│  • مجوز نقش‌ها — هر صفحه فقط داده‌های نقش خود را می‌خواند          │
+│  Service Layer  (src/lib/api.ts)  ← Unified REST contract           │
+│  • Authentication (JWT/HS256 + SHA-256 + Access Code)                  │
+│  • Role permissions - each page only reads its own role data          │
 ├─────────────────────────────────────────────────────────────────────┤
-│  AI Engines (src/lib/ai.ts) — محاسبات خالص و دترمینیستی            │
+│  AI Engines (src/lib/ai.ts) - Pure and deterministic calculations    │
 │  Risk • Wellness • Prediction • Planner • Teacher • Cheating • Guidance│
 ├─────────────────────────────────────────────────────────────────────┤
 │  JSON Database Manager (src/lib/db.ts)                             │
 │  atomic write • backup×5 • validation • auto-ID • lock • recovery   │
 ├─────────────────────────────────────────────────────────────────────┤
-│  database/*.json  (۹ فایل — تنها لایه‌ی ماندگاری)                  │
+│  database/*.json  (9 files - the only persistence layer)              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### ساختار پوشه‌ها
+### Folder Structure
 
 ```
 School-Intelligence-Platform/
 ├── index.html                  # RTL + Vazirmatn
-├── database/                   # تنها لایه‌ی داده (۹ فایل مجاز)
+├── database/                   # The only data layer (9 allowed files)
 │   ├── admin.json  teachers.json  students.json  parents.json
 │   ├── consultants.json  grades.json  books.json
 │   ├── notes.json  ai-analysis.json
 ├── src/
-│   ├── App.tsx                 # روتینگ + گاردها + ErrorBoundary
+│   ├── App.tsx                 # Routing + guards + ErrorBoundary
 │   ├── lib/
 │   │   ├── db.ts               # JSON Database Manager
 │   │   ├── auth.ts             # SHA-256 / JWT-HS256 / Access Code
-│   │   ├── ai.ts               # تمام الگوریتم‌های هوشمند
-│   │   ├── api.ts              # سرویس‌لایر (قرارداد REST + نصب + داده نمونه)
-│   │   ├── session.tsx         # بافت احراز هویت
-│   │   ├── types.ts            # مدل‌های دامنه (آینه‌ی schema فایل‌ها)
-│   │   └── format.ts           # فرمت فارسی (اعداد، تاریخ، هفته)
+│   │   ├── ai.ts               # All smart algorithms
+│   │   ├── api.ts              # Service layer (REST contract + install + demo data)
+│   │   ├── session.tsx         # Authentication context
+│   │   ├── types.ts            # Domain models (mirror of file schemas)
+│   │   └── format.ts           # Persian formatting (numbers, dates, weeks)
 │   ├── components/             # ui.tsx (UI kit) + layout.tsx (AppShell)
 │   └── pages/                  # Install, Login, Admin, Teacher, Consultant, Parent, Student, Errors, shared
 └── README.md
 ```
 
-### ویژگی‌های JSON Database Manager
+### JSON Database Manager Features
 
-- **Atomic write:** نگارش در کلید موقت → جابه‌جایی → پاک‌سازی (نیمه‌نگارش باقی نمی‌ماند)
-- **پشتیبان‌گیری:** ۵ نسخه قبل از هر بازنویسی
-- **اعتبارسنجی:** validator برای هر فایل پیش از commit
-- **Auto-ID:** شناسه‌های یکتا بدون تکرار (`nextId`)
-- **File Locking:** قفل تک‌نویس (re-entrancy guard)
-- **بازیابی خطا:** فایل خراب → بازگردانی خودکار از آخرین backup
+- **Atomic write:** Write to temporary key → move → cleanup (no half-write remains)
+- **Backup:** 5 versions before each rewrite
+- **Validation:** Validator for each file before commit
+- **Auto-ID:** Unique IDs without repetition (`nextId`)
+- **File Locking:** Technical lock (re-entrancy guard)
+- **Error Recovery:** Corrupted file → automatic restore from last backup
 
 ---
 
-## 💾 ساختار پایگاه داده (Database Structure)
+## 💾 Database Structure
 
-| فایل | کلکشن‌ها |
+| File | Collections |
 |---|---|
 | `admin.json` | `admins[]` |
-| `teachers.json` | `teachers[]` (با `assignments[]: lessonId, gradeId, classId`) |
-| `students.json` | `students[]` (با `parentUserId`)، `attendance[]`، `homeworks[]`، `homeworkSubmissions[]`، `behaviorReports[]` |
-| `parents.json` | `parents[]` (با `studentId`) |
+| `teachers.json` | `teachers[]` (with `assignments[]: lessonId, gradeId, classId`) |
+| `students.json` | `students[]` (with `parentUserId`), `attendance[]`, `homeworks[]`, `homeworkSubmissions[]`, `behaviorReports[]` |
+| `parents.json` | `parents[]` (with `studentId`) |
 | `consultants.json` | `consultants[]` |
-| `grades.json` | `grades[]`، `classes[]`، `exams[]`، `examScores[]` |
-| `books.json` | `lessons[]` (با `importance: 3..10`) |
-| `notes.json` | `notes[]`، `wellnessForms[]`، `alerts[]`، `activity[]` |
-| `ai-analysis.json` | `analyses[]`، `studyPlans[]`، `teacherAnalytics[]`، `cheatingFlags[]`، `guidance{}` |
+| `grades.json` | `grades[]`, `classes[]`, `exams[]`, `examScores[]` |
+| `books.json` | `lessons[]` (with `importance: 3..10`) |
+| `notes.json` | `notes[]`, `wellnessForms[]`, `alerts[]`, `activity[]` |
+| `ai-analysis.json` | `analyses[]`, `studyPlans[]`, `teacherAnalytics[]`, `cheatingFlags[]`, `guidance{}` |
 
-**رابطه‌ها:** student→class→grade، student→parent، teacher→lesson+class، exam→lesson+class، examScore→exam+student.
+**Relationships:** student→class→grade, student→parent, teacher→lesson+class, exam→lesson+class, examScore→exam+student.
 
 ---
 
-## 🧠 الگوریتم‌های هوشمند (Algorithms)
+## 🧠 Smart Algorithms
 
-### ۱. هشدار زودهنگام (Risk Score 0–100)
-میانگین وزنی ۷ عامل (هر عامل ۰ تا ۱۰۰ = شدت مشکل):
+### 1. Early Warning (Risk Score 0-100)
+Weighted average of 7 factors (each factor 0 to 100 = problem severity):
 
-| عامل | وزن | منبع داده |
+| Factor | Weight | Data Source |
 |---|---|---|
-| میانگین نمرات | ۲۵٪ | `examScores` |
-| غیبت | ۲۰٪ | `attendance` |
-| تکالیف | ۱۵٪ | `homeworkSubmissions` |
-| سلامت روان | ۱۵٪ | `wellnessForms` |
-| روند (شیب رگرسیون) | ۱۰٪ | میانگین سری آزمون‌ها |
-| رفتار | ۱۰٪ | `behaviorReports` |
-| دیررس | ۵٪ | `attendance(late)` |
+| Average grades | 25% | `examScores` |
+| Absence | 20% | `attendance` |
+| Homework | 15% | `homeworkSubmissions` |
+| Mental health | 15% | `wellnessForms` |
+| Trend (regression slope) | 10% | Average of exam series |
+| Behavior | 10% | `behaviorReports` |
+| Late arrival | 5% | `attendance(late)` |
 
-آستانه‌ها: `≥75` بحرانی (هشدار خودکار به مشاور/مدیر/والدین) — `50..74` بالا — `25..49` متوسط — `<25` پایین.
-مدل هر اجرا `reasons` (دلایل) و `recommendations` (توصیه‌های اجرایی) هم تولید می‌کند.
+Thresholds: `≥75` Critical (automatic alert to consultant/admin/parents) — `50..74` High — `25..49` Medium — `<25` Low.
+Each execution also generates `reasons` and `recommendations`.
 
-### ۲. تحلیل سلامت روان
-فرم هفتگی ۸ سؤالی (۱ تا ۵) → شاخص‌های `stress`، `anxiety` (فشار + استرس)، `motivation` (انگیزه + تمرکز)، `sleep` و `overall`. احتمال ترک/افت:
-`0.45·risk + 0.25·stress + 0.2·(100-حضور) + 0.1·(100-motivation)`.
+### 2. Mental Health Analysis
+Weekly 8-question form (1 to 5) → `stress`, `anxiety` (pressure + stress), `motivation` (motivation + focus), `sleep` and `overall` indices. Dropout risk probability:
+`0.45·risk + 0.25·stress + 0.2·(100-attendance) + 0.1·(100-motivation)`.
 
-### ۳. پیش‌بینی نمرات (Prediction Engine)
-- رگرسیون خطی (least-squares) بر سری نمرات هر درس → **پیش‌بینی آزمون بعد**
-- **احتمال قبولی:** تابع لوجستیک `1/(1+e^(-0.62·(avg-10)))` (۵۰٪ در نمره ۱۰)
-- **احتمال افت:** ترکیب شیب منفی + فاصله از خط قبولی
-- **پیش‌بینی میانگین ترم:** `avg + 1.5·slope`
-- **درصد اطمینان:** تابع تعداد آزمون‌ها و انحراف باقیمانده‌ها
+### 3. Grade Prediction Engine
+- Linear regression (least-squares) on each lesson's grade series → **next exam prediction**
+- **Pass probability:** Logistic function `1/(1+e^(-0.62·(avg-10)))` (50% at grade 10)
+- **Decline probability:** Combination of negative slope + distance from pass line
+- **Term average prediction:** `avg + 1.5·slope`
+- **Confidence percentage:** Function of number of exams and residual deviation
 
-### ۴. تحلیل دبیر
-`efficiency = 0.4·(میانگین کلاس) + 0.3·(پیشرفت روند) + 0.3·(انجام تکالیف)` به‌همراه **شاخص سختی آزمون** `(1-avg/20)` و مقایسه‌ی روند.
+### 4. Teacher Analysis
+`efficiency = 0.4·(class average) + 0.3·(trend progress) + 0.3·(homework completion)` along with **exam difficulty index** `(1-avg/20)` and trend comparison.
 
-### ۵. تحلیل مدرسه
-میانگین پایه‌ای/کلاسی/درسی، نمادهارت پایه×درس، دروس در معرض افت، برترین‌ها، روند حضور و مقایسه‌ی کارآموزی دبیران.
+### 5. School Analysis
+Average by grades/classes/lessons, grade×lesson heatmaps, at-risk lessons, top students, attendance trends and teacher efficiency comparison.
 
-### ۶. تشخیص تقلب (Anomaly Detection)
-- **پرش هم‌زمان:** اگر دو دانش‌آموز هر دو بیش از ۴ نمره بالاتر از میانگین گذشته‌شان بیایند و نمره‌شان اختلاف ≤۱ داشته باشد ← پرچم «کپی پاسخ‌ها»
-- **الگوی یکسان:** همبستگی پیرسون میان بردار میانگین‌درس‌های دو همکلاسی `>0.975` با اختلاف میانگین `<0.6`
+### 6. Cheating Detection (Anomaly Detection)
+- **Simultaneous jump:** If two students both score more than 4 points above their past average and their scores differ by ≤1 → "copy answers" flag
+- **Identical pattern:** Pearson correlation between two classmates' lesson average vectors `>0.975` with average difference `<0.6`
 
-### ۷. برنامه مطالعاتی هوشمند
-نیاز هر درس: `importance × (1 - avg/20)` → تقسیم ۷۸۰ دقیقه هفتگی بر ۵ روز (سقف ۱۸۰ دقیقه/روز، بلوک‌های ۱۵+ دقیقه‌ای) با نوع بلوک (تست/مطالعه/مرور) و اهداف ماهانه.
+### 7. Smart Study Plan
+Each lesson's need: `importance × (1 - avg/20)` → divide 780 weekly minutes by 5 days (max 180 minutes/day, 15+ minute blocks) with block type (test/study/review) and monthly goals.
 
-### ۸. هدایت تحصیلی
-پوش‌سازی پروفایل درسی روی ۴ خانواده رشته (ریاضی-فیزیک / تجربی / انسانی-ادبی / هنر-فناوری) با درصد تطابق و دلیل.
+### 8. Academic Guidance
+Profile clustering on 4 field families (Math-Physics / Experimental / Humanities-Literature / Arts-Technology) with match percentage and reasoning.
 
-### ۹. بینش والدین
-بهترین زمان مطالعه (بر اساس انگیزه/تمرکز)، توصیه خواب (بر اساس شاخص استرس)، نقاط ضعف، فعالیت‌های خانوادگی و **گزارش هفتگی متنی** تولیدشده.
+### 9. Parent Insights
+Best study time (based on motivation/focus), sleep recommendations (based on stress index), weak points, family activities and **weekly text report** generation.
 
 ---
 
-## 🔌 مستندات API (قرارداد سرویس‌لایر)
+## 🔌 API Documentation (Service Layer Contract)
 
-همه‌ی عملیات از `src/lib/api.ts` — در سرور Node/Express همان امضاها به‌عنوان endpointهای REST پیاده می‌شوند:
+All operations from `src/lib/api.ts` - in Node/Express server, the same signatures are implemented as REST endpoints:
 
-| گروه | عملیات |
+| Group | Operations |
 |---|---|
-| Session | `bootstrap()` ، `login(u,p,code)` ، `logout()` |
-| Install | `install(payload)` → تولید کدهای دسترسی + `seedDemo()` اختیاری |
-| Admin | `adminOverview()` ، `studentsList()` ، `studentReport(id)` ، `teachersList()` ، `parentsList()` ، `consultantsList()` ، `schoolAnalyticsFull()` ، `alertsList()` ، `markAlertRead(id)` ، `addGrade/addClass/addLesson` ، `loadDemoData()` ، `systemReset()` ، `healthDetail()` |
-| Teacher | `teacherHome(id)` ، `saveAttendance(classId,date,marks)` ، `addHomework(...)` ، `toggleHomework(...)` ، `addExam(...)` ، `saveExamScores(examId,scores)` ، `addBehavior(...)` |
-| Consultant | `consultantHome()` ، `timeline(studentId)` ، `addConsultantNote(...)` |
+| Session | `bootstrap()`, `login(u,p,code)`, `logout()` |
+| Install | `install(payload)` → generate access codes + optional `seedDemo()` |
+| Admin | `adminOverview()`, `studentsList()`, `studentReport(id)`, `teachersList()`, `parentsList()`, `consultantsList()`, `schoolAnalyticsFull()`, `alertsList()`, `markAlertRead(id)`, `addGrade/addClass/addLesson`, `loadDemoData()`, `systemReset()`, `healthDetail()` |
+| Teacher | `teacherHome(id)`, `saveAttendance(classId,date,marks)`, `addHomework(...)`, `toggleHomework(...)`, `addExam(...)`, `saveExamScores(examId,scores)`, `addBehavior(...)` |
+| Consultant | `consultantHome()`, `timeline(studentId)`, `addConsultantNote(...)` |
 | Parent | `parentHome(parentId)` |
-| Student | `studentHome(id)` ، `submitWellness(answers)` ، `submitHomework(id)` |
+| Student | `studentHome(id)`, `submitWellness(answers)`, `submitHomework(id)` |
 
-**امنیت:** هاش SHA-256 + Salt برای رمزها، توکن امضاشده‌ی HS256 با انقضا (۱۲ ساعت)، کد دسترسی ۱۲ کاراکتری هر نقش، اعتبارسنجی ورودی در همه فرم‌ها (react-hook-form + قوانین دامنه)، جداسازی داده‌ها بر اساس نقش (والد فقط فرزند خود و …).
+**Security:** SHA-256 + Salt hash for passwords, HS256 signed tokens with expiration (12 hours), 12-character access code for each role, input validation in all forms (react-hook-form + domain rules), data isolation by role (parent only sees their child, etc.).
 
 ---
 
-## 🚀 راهنمای دپلوی (Deployment)
+## 🚀 Deployment Guide
 
-1. `npm run build` → سرو کردن `dist/` روی هر استاتیک‌سرور (Nginx/Netlify/…)
-2. برای نسخه‌ی سرور: قرارداد `src/lib/api.ts` را روی Express پیاده کنید؛ فایل‌های `database/*.json` در مسیر `DATABASE_DIR` قرار گیرند و JSON Manager همان منطق atomic/backup/lock را روی `fs` اجرا کند (مطالعه‌ی `db.ts`).
-3. متغیر `DATABASE_DIR` + نرخ‌لیمیت و Helmet را در میانی‌ورهای Express فعال کنید.
+1. `npm run build` → serve `dist/` on any static server (Nginx/Netlify/...)
+2. For server version: Implement the `src/lib/api.ts` contract on Express; place `database/*.json` files in `DATABASE_DIR` path and have JSON Manager run the same atomic/backup/lock logic on `fs` (study `db.ts`).
+3. Enable `DATABASE_DIR` + rate limiting and Helmet in Express middlewares.
 
-## 🔭 بهبودهای آینده (Future Improvements)
+## 🔭 Future Improvements
 
-- مدل‌های سری‌زمانی (ARIMA/Prophet) برای پیش‌بینی دقیق‌تر و BERT برای تحلیل متن یادداشت‌ها
-- همبستگی بین‌کلاسی و خوشه‌بندی دانش‌آموزان هم‌ریسک
-- PWA + اعلان push برای والدین، بکاپ ابری امضاشده، و گزارش چاپی PDF مشاوره
-- پنل چندمدرسه (Multi-tenant) با ایزوله‌سازی کامل فایل‌ها
+- Time series models (ARIMA/Prophet) for more accurate predictions and BERT for note text analysis
+- Inter-class correlation and clustering of same-risk students
+- PWA + push notifications for parents, signed cloud backup, and printable PDF consultation reports
+- Multi-school panel (Multi-tenant) with complete file isolation
 
-## 👨‍ راهنمای توسعه (Developer Guide)
+## 👨 Developer Guide
 
-- **TS سخت‌گیرانه:** strict، بدون `any`، بدون magic number (ثابت‌ها در `ai.ts` با نام معنادار)، بدون `console.log` در مسیر تولید
-- **تست دستی سریع:** نصب → تیک «داده‌های نمونه» → ورود با هر نقش
-- **قواعد:** همه‌ی الگوریتم‌ها در `ai.ts` خالص و بدون Side-effect هستند — برای افزودن عامل جدید به ریسک، فقط یک `RiskFactor` با وزن نامدار به `RISK_WEIGHTS` و `factors[]` اضافه کنید؛ هشدارها، نمودارها و توصیه‌ها خودبه‌خود با آن درگیر می‌شوند.
+- **Strict TS:** strict mode, no `any`, no magic numbers (constants in `ai.ts` with meaningful names), no `console.log` in production path
+- **Quick manual test:** Install → check "demo data" → login with any role
+- **Rules:** All algorithms in `ai.ts` are pure and side-effect free - to add a new risk factor, just add a `RiskFactor` with a named weight to `RISK_WEIGHTS` and `factors[]`; alerts, charts and recommendations will automatically engage with it.
