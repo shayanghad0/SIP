@@ -37,7 +37,7 @@ function BootScreen() {
       <div className="flex h-14 w-14 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-600/30">
         <BrainCircuit size={28} className="text-white" />
       </div>
-      <p className="text-[13px] text-slate-400">در حال بارگذاری سامانه هوشمند مدارس...</p>
+      <p className="text-[13px] text-slate-400">در حال بارگذاری سیپ — سامانه یکپارچه پیشرفت دانش آموزی...</p>
     </div>
   );
 }

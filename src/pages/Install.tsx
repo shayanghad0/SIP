@@ -380,7 +380,7 @@ export default function InstallWizard() {
               {/* Text */}
               <div className="text-center">
                 <h2 className="mb-2 text-2xl font-bold text-emerald-400">نصب با موفقیت انجام شد!</h2>
-                <p className="text-sm text-slate-300">سامانه هوشمند مدارس (SIP) آماده است</p>
+                <p className="text-sm text-slate-300">سیپ — سامانه یکپارچه پیشرفت دانش آموزی آماده است</p>
               </div>
               <div className="h-1 w-48 overflow-hidden rounded-full bg-slate-700">
                 <div className="h-full w-full animate-loading-bar bg-gradient-to-r from-emerald-400 to-green-500" />
@@ -395,7 +395,7 @@ export default function InstallWizard() {
           <BrainCircuit size={24} className="text-white" />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-slate-50">نصب سامانه هوشمند مدارس (SIP)</h1>
+          <h1 className="text-lg font-bold text-slate-50">نصب سیپ — سامانه یکپارچه پیشرفت دانش آموزی</h1>
           <p className="text-[12px] text-slate-400">{schoolName} — پیکربندی اولیه در ۸ مرحله</p>
         </div>
         <button
@@ -681,7 +681,6 @@ function StepLessons({ lessons, setLessons, onSkip }: { lessons: { name: string;
           <h3 className="mb-1 flex items-center gap-2 text-[15px] font-semibold text-slate-100"><BookOpen size={17} className="text-blue-400" /> دروس تحصیلی</h3>
           <p className="text-[12px] text-slate-500">هر درس یک امتیاز اهمیت بین ۳ تا ۱۰ دارد که در محاسبه ریسک و برنامه مطالعاتی استفاده می‌شود. <span className="text-amber-300/80">(اختیاری)</span></p>
         </div>
-        <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
         {presets.map(([n, i]) => (

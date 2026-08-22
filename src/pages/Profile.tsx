@@ -72,7 +72,7 @@ export default function Profile() {
             </div>
             <div>
               <p className="text-sm font-bold text-slate-50">SIP</p>
-              <p className="text-[10px] text-slate-400">سامانه هوشمند مدارس</p>
+              <p className="text-[10px] text-slate-400">سیپ — سامانه یکپارچه پیشرفت دانش آموزی</p>
             </div>
           </div>
           <nav className="mt-2 flex-1 space-y-1 overflow-y-auto px-3">

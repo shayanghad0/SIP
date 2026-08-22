@@ -60,7 +60,7 @@ export default function Login() {
               <BrainCircuit size={24} className="text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-50">سامانه هوشمند مدارس (SIP)</h1>
+              <h1 className="text-lg font-bold text-slate-50">سیپ — سامانه یکپارچه پیشرفت دانش آموزی</h1>
               <p className="text-[12px] text-slate-400">تحلیل، پیشبینی و تصمیمیار هوشمند آموزشی</p>
             </div>
           </div>
