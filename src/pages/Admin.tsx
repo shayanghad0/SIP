@@ -51,11 +51,11 @@ import { Bars, Donut, StudentReportModal, TrendLine, COLORS, riskLevelLabel } fr
 const NAV: NavItem[] = [
   { key: "overview", label: "نمای کلی", icon: LayoutDashboard },
   { key: "students", label: "دانش‌آموزان", icon: Users },
-  { key: "alerts", label: "هشدارهای هوشمند", icon: Bell },
-  { key: "analytics", label: "تحلیل‌های مدرسه", icon: BarChart3 },
   { key: "teachers", label: "دبیران", icon: GraduationCap },
-  { key: "family", label: "والدین", icon: HeartHandshake },
   { key: "consultants", label: "مشاوران", icon: ShieldCheck },
+  { key: "family", label: "والدین", icon: HeartHandshake },
+  { key: "analytics", label: "تحلیل‌های مدرسه", icon: BarChart3 },
+  { key: "alerts", label: "هشدارهای هوشمند", icon: Bell },
   { key: "settings", label: "تنظیمات سیستم", icon: Settings },
 ];
 
