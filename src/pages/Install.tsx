@@ -103,9 +103,9 @@ const STEP_GUIDES: Record<string, { title: string; what: string; why: string; ho
   },
   consultant: {
     title: "حساب مشاور و ناظم",
-    what: "یک یا چند حساب برای مشاوران و ناظمان مدرسه ایجاد می‌کنید.",
+    what: "در این مرحله حساب‌هایی برای مشاوران و ناظمان مدرسه ایجاد می‌کنید. (اختیاری — می‌توانید این مرحله را رد کنید)",
     why: "مشاوران و ناظمان دانش‌آموزان پرخطر را پایش می‌کنند، فرم‌های سلامت روان را بررسی می‌کنند و گزارش مشاوره ثبت می‌کنند. دسترسی آن‌ها فقط به دانش‌آموزان پرخطر است.",
-    how: ["نام و نام خانوادگی مشاور/ناظم را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور/ناظم اضافه کنید", "حداقل یک مشاور الزامی است"],
+    how: ["نام و نام خانوادگی مشاور/ناظم را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور/ناظم اضافه کنید", "این مرحله اختیاری است — با زدن «رد کردن» می‌توانید از آن عبور کنید"],
   },
   students: {
     title: "دانش‌آموزان",
@@ -217,7 +217,6 @@ export default function InstallWizard() {
         if (lessons.some((l) => l.importance < 3)) return notify.error("حداقل اهمیت درس ۳ است");
         return setStep(4);
       case 4:
-        if (consultants.length < 1) return notify.error("حداقل یک مشاور/ناظم ثبت کنید");
         if (!uniqueUsernames()) return notify.error("نام کاربری تکراری وجود دارد");
         return setStep(5);
       case 5:
@@ -497,7 +496,7 @@ export default function InstallWizard() {
             }}
           />
         )}
-        {step === 4 && <StepConsultants items={consultants} setItems={setConsultants} />}
+        {step === 4 && <StepConsultants items={consultants} setItems={setConsultants} onSkip={() => { setConsultants([]); notify.info("مرحله مشاور رد شد — بعداً می‌توانید مشاور اضافه کنید"); setStep(5); }} />}
         {step === 5 && (
           <StepStudents
             items={students}
@@ -680,7 +679,7 @@ function StepLessons({ lessons, setLessons, onSkip }: { lessons: { name: string;
       <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="mb-1 flex items-center gap-2 text-[15px] font-semibold text-slate-100"><BookOpen size={17} className="text-blue-400" /> دروس تحصیلی</h3>
-          <p className="text-[12px] text-slate-500">هر درس یک امتیاز اهمیت بین ۳ تا ۱۰ دارد که در محاسبه ریسک و برنامه مطالعاتی استفاده می‌شود.</p>
+          <p className="text-[12px] text-slate-500">هر درس یک امتیاز اهمیت بین ۳ تا ۱۰ دارد که در محاسبه ریسک و برنامه مطالعاتی استفاده می‌شود. <span className="text-amber-300/80">(اختیاری)</span></p>
         </div>
         <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
       </div>
@@ -781,8 +780,19 @@ function EntryList({ items, setItems, title, desc }: { items: EntryRec[]; setIte
   );
 }
 
-function StepConsultants({ items, setItems }: { items: { fullName: string; username: string; password: string }[]; setItems: (i: { fullName: string; username: string; password: string }[]) => void }) {
-  return <EntryList items={items} setItems={setItems} title="مشاور و ناظم مدرسه" desc="حساب مشاور/ناظم برای پایش سلامت روان و دانش‌آموزان پرخطر ساخته می‌شود." />;
+function StepConsultants({ items, setItems, onSkip }: { items: { fullName: string; username: string; password: string }[]; setItems: (i: { fullName: string; username: string; password: string }[]) => void; onSkip: () => void }) {
+  return (
+    <div>
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h3 className="mb-1 flex items-center gap-2 text-[15px] font-semibold text-slate-100"><UserPlus size={17} className="text-blue-400" /> مشاور و ناظم مدرسه</h3>
+          <p className="text-[12px] text-slate-500">حساب مشاور/ناظم برای پایش سلامت روان و دانش‌آموزان پرخطر ساخته می‌شود. <span className="text-amber-300/80">(اختیاری)</span></p>
+        </div>
+        <Button variant="outline" onClick={onSkip}>رد کردن این مرحله</Button>
+      </div>
+      <EntryList items={items} setItems={setItems} title="" desc="" />
+    </div>
+  );
 }
 
 /* ================= step 6 — students ================= */
