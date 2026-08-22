@@ -45,6 +45,7 @@ import type {
   AttendanceStatus,
   BehaviorType,
   BooksFile,
+  Consultant,
   ConsultantsFile,
   Exam,
   GradesFile,
@@ -799,9 +800,9 @@ export async function parentsList(): Promise<{ parent: Parent; studentName: stri
   });
 }
 
-export async function consultantsList(): Promise<{ fullName: string; username: string; createdAt: string }[]> {
+export async function consultantsList(): Promise<{ id: string; fullName: string; username: string; specialty: string; createdAt: string }[]> {
   await sleep(LATENCY_MS / 2);
-  return readDb<ConsultantsFile>("consultants").consultants.map((c) => ({ fullName: c.fullName, username: c.username, createdAt: c.createdAt }));
+  return readDb<ConsultantsFile>("consultants").consultants.map((c) => ({ id: c.id, fullName: c.fullName, username: c.username, specialty: c.specialty, createdAt: c.createdAt }));
 }
 
 export interface SchoolAnalyticsData {
@@ -1156,6 +1157,84 @@ export async function deleteTeacherRecord(teacherId: string): Promise<void> {
     teacherAnalytics: d.teacherAnalytics.filter((a) => a.teacherId !== teacherId),
   }));
   logActivity("admin", "مدیر", `دبیر «${teacher.fullName}» حذف شد`);
+  recompute();
+}
+
+/* ================= admin add/edit/delete consultant ================= */
+
+export async function addConsultantRecord(payload: {
+  fullName: string;
+  username: string;
+  password: string;
+  specialty?: string;
+}): Promise<{ consultant: Consultant }> {
+  const consultantsFile = readDb<ConsultantsFile>("consultants");
+  const exists = consultantsFile.consultants.find((c) => c.username.toLowerCase() === payload.username.toLowerCase());
+  if (exists) throw new Error("نام کاربری مشاور قبلاً وجود دارد");
+  const h = await hashPassword(payload.password);
+  const consultant: Consultant = {
+    id: nextId("con"),
+    role: "consultant",
+    fullName: payload.fullName,
+    username: payload.username,
+    passwordHash: h.hash,
+    salt: h.salt,
+    accessCode: generateAccessCode("consultant"),
+    createdAt: new Date().toISOString(),
+    specialty: payload.specialty || "مشاوره تحصیلی",
+  };
+  updateDb<ConsultantsFile>("consultants", (d) => ({ ...d, consultants: [...d.consultants, consultant] }));
+  logActivity("admin", "مدیر", `مشاور «${consultant.fullName}» اضافه شد`);
+  recompute();
+  return { consultant };
+}
+
+export async function updateConsultantRecord(consultantId: string, payload: {
+  fullName?: string;
+  username?: string;
+  password?: string;
+  specialty?: string;
+}): Promise<void> {
+  const consultantsFile = readDb<ConsultantsFile>("consultants");
+  const idx = consultantsFile.consultants.findIndex((c) => c.id === consultantId);
+  if (idx === -1) throw new Error("مشاور یافت نشد");
+  const consultant = consultantsFile.consultants[idx];
+  if (payload.username && payload.username.toLowerCase() !== consultant.username.toLowerCase()) {
+    const exists = consultantsFile.consultants.some((c) => c.id !== consultantId && c.username.toLowerCase() === payload.username!.toLowerCase());
+    if (exists) throw new Error("نام کاربری قبلاً استفاده شده است");
+  }
+  let newPasswordHash = consultant.passwordHash;
+  let newSalt = consultant.salt;
+  if (payload.password) {
+    const h = await hashPassword(payload.password);
+    newPasswordHash = h.hash;
+    newSalt = h.salt;
+  }
+  const updated: Consultant = {
+    ...consultant,
+    fullName: payload.fullName ?? consultant.fullName,
+    username: payload.username ?? consultant.username,
+    passwordHash: newPasswordHash,
+    salt: newSalt,
+    specialty: payload.specialty ?? consultant.specialty,
+  };
+  updateDb<ConsultantsFile>("consultants", (d) => ({
+    ...d,
+    consultants: d.consultants.map((c) => (c.id === consultantId ? updated : c)),
+  }));
+  logActivity("admin", "مدیر", `مشاور «${updated.fullName}» ویرایش شد`);
+  recompute();
+}
+
+export async function deleteConsultantRecord(consultantId: string): Promise<void> {
+  const consultantsFile = readDb<ConsultantsFile>("consultants");
+  const consultant = consultantsFile.consultants.find((c) => c.id === consultantId);
+  if (!consultant) throw new Error("مشاور یافت نشد");
+  updateDb<ConsultantsFile>("consultants", (d) => ({
+    ...d,
+    consultants: d.consultants.filter((c) => c.id !== consultantId),
+  }));
+  logActivity("admin", "مدیر", `مشاور «${consultant.fullName}» حذف شد`);
   recompute();
 }
 

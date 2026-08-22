@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   addClass,
+  addConsultantRecord,
   addGrade,
   addLesson,
   adminOverview,
@@ -10,6 +11,7 @@ import {
   addStudentRecord,
   addTeacherRecord,
   consultantsList,
+  deleteConsultantRecord,
   deleteStudentRecord,
   deleteTeacherRecord,
   healthDetail,
@@ -20,6 +22,7 @@ import {
   studentsList,
   systemReset,
   teachersList,
+  updateConsultantRecord,
   updateStudentRecord,
   updateTeacherRecord,
   type AlertNamed,
@@ -749,14 +752,12 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: "
 
 function Family() {
   const [parents, setParents] = useState<{ parent: { username: string; fullName: string }; studentName: string; classLabel: string; risk: number }[] | null>(null);
-  const [cons, setCons] = useState<{ fullName: string; username: string; createdAt: string }[] | null>(null);
   useEffect(() => {
     parentsList().then(setParents);
-    consultantsList().then(setCons);
   }, []);
-  if (!parents || !cons) return <SkeletonGrid rows={4} />;
+  if (!parents) return <SkeletonGrid rows={4} />;
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="space-y-5">
       <Card title={`والدین (${faNum(parents.length)})`} subtitle="هر والد فقط به داده‌های فرزند خود دسترسی دارد">
         <div className="space-y-2">
           {parents.map((p) => (
@@ -773,23 +774,121 @@ function Family() {
           {parents.length === 0 && <p className="py-4 text-center text-[12px] text-slate-500">والدینی ثبت نشده است.</p>}
         </div>
       </Card>
-      <Card title={`مشاوران (${faNum(cons.length)})`}>
+      <ConsultantsManager />
+    </div>
+  );
+}
+
+/* ================= consultants ================= */
+
+function ConsultantsManager() {
+  type ConsultantRow = { id: string; fullName: string; username: string; specialty: string; createdAt: string };
+  const [rows, setRows] = useState<ConsultantRow[] | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editCon, setEditCon] = useState<ConsultantRow | null>(null);
+  const { register, handleSubmit, reset, setValue } = useForm<any>({
+    defaultValues: { fullName: "", username: "", password: "", specialty: "" },
+  });
+
+  useEffect(() => {
+    consultantsList().then(setRows);
+  }, []);
+
+  useEffect(() => {
+    if (editCon) {
+      setValue("fullName", editCon.fullName);
+      setValue("username", editCon.username);
+      setValue("password", "");
+      setValue("specialty", editCon.specialty || "");
+      setShowAdd(true);
+    }
+  }, [editCon, setValue]);
+
+  const onSubmit = async (v: any) => {
+    try {
+      if (editCon) {
+        await updateConsultantRecord(editCon.id, {
+          fullName: v.fullName.trim(),
+          username: v.username.trim(),
+          password: v.password || undefined,
+          specialty: v.specialty.trim() || undefined,
+        });
+        notify.success("اطلاعات مشاور به‌روزرسانی شد");
+        setEditCon(null);
+      } else {
+        await addConsultantRecord({
+          fullName: v.fullName.trim(),
+          username: v.username.trim(),
+          password: v.password,
+          specialty: v.specialty.trim() || undefined,
+        });
+        notify.success("مشاور اضافه شد");
+      }
+      setShowAdd(false);
+      reset();
+      consultantsList().then(setRows);
+    } catch (e: any) {
+      notify.error(e?.message ?? "خطا در عملیات");
+    }
+  };
+
+  if (!rows) return <SkeletonGrid rows={4} />;
+  return (
+    <div>
+      <Card title={`مشاوران (${faNum(rows.length)})`} subtitle="مدیریت مشاوران مدرسه">
+        <div className="mb-3 flex justify-end">
+          <Button variant="outline" onClick={() => { setEditCon(null); reset(); setShowAdd(true); }}><UserPlus size={14} /> افزودن مشاور</Button>
+        </div>
         <div className="space-y-2">
-          {cons.map((c) => (
-            <div key={c.username} className="flex items-center gap-3 rounded-xl border border-slate-700/40 bg-[#0b1222] px-3 py-2.5">
+          {rows.map((c) => (
+            <div key={c.id} className="flex items-center gap-3 rounded-xl border border-slate-700/40 bg-[#0b1222] px-3 py-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-300">
                 <ShieldCheck size={16} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[13px] text-slate-200">{c.fullName}</p>
                 <p dir="ltr" className="text-right text-[11px] text-slate-500">{c.username}</p>
+                {c.specialty && <p className="text-[10.5px] text-slate-500">{c.specialty}</p>}
               </div>
               <span className="mr-auto text-[10.5px] text-slate-500">{faDate(c.createdAt)}</span>
+              <div className="flex gap-1">
+                <Button variant="ghost" className="px-2 py-1" onClick={() => setEditCon(c)}>
+                  <Edit size={14} />
+                </Button>
+                <Button variant="ghost" className="px-2 py-1 text-rose-400 hover:text-rose-300" onClick={async () => {
+                  if (window.confirm(`آیا از حذف مشاور «${c.fullName}» مطمئن هستید؟`)) {
+                    try {
+                      await deleteConsultantRecord(c.id);
+                      notify.success("مشاور حذف شد");
+                      consultantsList().then(setRows);
+                    } catch (e: any) {
+                      notify.error(e?.message ?? "خطا در حذف");
+                    }
+                  }
+                }}>
+                  <Trash size={14} />
+                </Button>
+              </div>
             </div>
           ))}
-          {cons.length === 0 && <p className="py-4 text-center text-[12px] text-slate-500">مشاور ثبت نشده است.</p>}
+          {rows.length === 0 && <p className="py-4 text-center text-[12px] text-slate-500">مشاور ثبت نشده است.</p>}
         </div>
       </Card>
+
+      <Modal open={showAdd} onClose={() => { setShowAdd(false); setEditCon(null); reset(); }} title={editCon ? "ویرایش مشاور" : "افزودن مشاور"}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Field label="نام و نام خانوادگی"><Input {...register("fullName", { required: true })} /></Field>
+            <Field label="نام کاربری"><Input dir="ltr" {...register("username", { required: true })} /></Field>
+            <Field label="رمز عبور (در صورت تغییر)"><Input dir="ltr" type="password" {...register("password")} placeholder="••••••••" /></Field>
+            <Field label="تخصص"><Input {...register("specialty")} placeholder="مشاوره تحصیلی" /></Field>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => { setShowAdd(false); setEditCon(null); reset(); }}>انصراف</Button>
+            <Button type="submit">{editCon ? "ذخیره تغییرات" : "افزودن"}</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
