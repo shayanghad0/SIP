@@ -11,8 +11,8 @@ import { StudentReportModal, riskLevelLabel } from "./shared";
 
 const NAV: NavItem[] = [
   { key: "overview", label: "نمای کلی", icon: LayoutDashboard },
-  { key: "risk", label: "دانش‌آموزان پرخطر", icon: HeartPulse },
   { key: "forms", label: "فرم‌های سلامت روان", icon: Brain },
+  { key: "risk", label: "دانش‌آموزان پرخطر", icon: HeartPulse },
   { key: "timeline", label: "تایم‌لاین و یادداشت", icon: MessageSquareHeart },
 ];
 
