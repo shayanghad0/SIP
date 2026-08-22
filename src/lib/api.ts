@@ -672,7 +672,7 @@ export async function studentsList(): Promise<StudentRow[]> {
   const L = labels();
   return students.students.map((st) => {
     const a = ai.analyses.find((x) => x.studentId === st.id);
-    return { student: st, classLabel: L.classLabel(st.classId), risk: a?.riskScore ?? 0, level: a?.level ?? "low", avg: a?.overallAvg ?? 0, attendanceRate: a?.attendanceRate ?? 100 };
+    return { student: st, classLabel: L.classLabel(st.classId), risk: a?.riskScore ?? 0, level: a?.level ?? "low", avg: a?.overallAvg ?? 0, attendanceRate: a?.attendanceRate ?? 0 };
   });
 }
 

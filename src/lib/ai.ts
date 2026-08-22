@@ -190,6 +190,40 @@ export function analyzeStudent(snap: StudentSnapshot, lessons: Lesson[]): Studen
   const { attendance, homework, behavior, wellness } = snap;
 
   const allValues = snap.series.flatMap((s) => s.scores.map((p) => (p.value / p.max) * MAX_SCORE));
+
+  // No data yet → all zeros
+  const hasAnyData = allValues.length > 0 || (attendance.present + attendance.absent + attendance.late) > 0 || homework.assigned > 0 || (behavior.positive + behavior.negative) > 0 || wellness.length > 0;
+  if (!hasAnyData) {
+    return {
+      studentId: snap.student.id,
+      riskScore: 0,
+      level: "low",
+      factors: [
+        { key: "academic", label: "میانگین نمرات", weight: RISK_WEIGHTS.academic, score: 0 },
+        { key: "attendance", label: "غیبت و شرکت", weight: RISK_WEIGHTS.attendance, score: 0 },
+        { key: "homework", label: "تکالیف", weight: RISK_WEIGHTS.homework, score: 0 },
+        { key: "wellness", label: "سلامت روان", weight: RISK_WEIGHTS.wellness, score: 0 },
+        { key: "trend", label: "روند نمرات", weight: RISK_WEIGHTS.trend, score: 0 },
+        { key: "behavior", label: "رفتار کلاسی", weight: RISK_WEIGHTS.behavior, score: 0 },
+        { key: "lateness", label: "دیررس‌ها", weight: RISK_WEIGHTS.lateness, score: 0 },
+      ],
+      reasons: [],
+      recommendations: [],
+      predictions: [],
+      overallAvg: 0,
+      classAvg: snap.classAvg,
+      attendanceRate: 0,
+      homeworkRate: 0,
+      stressIndex: 0,
+      anxietyIndex: 0,
+      motivation: 0,
+      dropoutProbability: 0,
+      learningSpeed: 0,
+      confidence: 0,
+      predictedSemesterAvg: 0,
+      updatedAt: new Date().toISOString(),
+    };
+  }
   const overallAvg = mean(allValues);
 
   // Exam-level series (avg of all scores on that exam date) for trend.
