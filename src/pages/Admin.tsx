@@ -53,7 +53,8 @@ const NAV: NavItem[] = [
   { key: "alerts", label: "هشدارهای هوشمند", icon: Bell },
   { key: "analytics", label: "تحلیل‌های مدرسه", icon: BarChart3 },
   { key: "teachers", label: "دبیران", icon: GraduationCap },
-  { key: "family", label: "خانواده‌ها و مشاور", icon: HeartHandshake },
+  { key: "family", label: "والدین", icon: HeartHandshake },
+  { key: "consultants", label: "مشاوران", icon: ShieldCheck },
   { key: "settings", label: "تنظیمات سیستم", icon: Settings },
 ];
 
@@ -72,6 +73,7 @@ export default function AdminDashboard({ section }: { section: string }) {
       {activeSection === "analytics" && <Analytics />}
       {activeSection === "teachers" && <Teachers />}
       {activeSection === "family" && <Family />}
+      {activeSection === "consultants" && <Consultants />}
       {activeSection === "settings" && <SettingsSection />}
       <StudentReportModal studentId={reportFor} onClose={() => setReportFor(null)} />
     </AppShell>
@@ -757,8 +759,9 @@ function Family() {
   }, []);
   if (!parents) return <SkeletonGrid rows={4} />;
   return (
-    <div className="space-y-5">
-      <Card title={`والدین (${faNum(parents.length)})`} subtitle="هر والد فقط به داده‌های فرزند خود دسترسی دارد">
+    <div>
+      <PageHeader title="والدین" subtitle={`${faNum(parents.length)} والد — هر والد فقط به داده‌های فرزند خود دسترسی دارد`} />
+      <Card title={`والدین (${faNum(parents.length)})`}>
         <div className="space-y-2">
           {parents.map((p) => (
             <div key={p.parent.username} className="flex items-center gap-3 rounded-xl border border-slate-700/40 bg-[#0b1222] px-3 py-2.5">
@@ -774,14 +777,13 @@ function Family() {
           {parents.length === 0 && <p className="py-4 text-center text-[12px] text-slate-500">والدینی ثبت نشده است.</p>}
         </div>
       </Card>
-      <ConsultantsManager />
     </div>
   );
 }
 
 /* ================= consultants ================= */
 
-function ConsultantsManager() {
+function Consultants() {
   type ConsultantRow = { id: string; fullName: string; username: string; specialty: string; createdAt: string };
   const [rows, setRows] = useState<ConsultantRow[] | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -835,10 +837,10 @@ function ConsultantsManager() {
   if (!rows) return <SkeletonGrid rows={4} />;
   return (
     <div>
-      <Card title={`مشاوران (${faNum(rows.length)})`} subtitle="مدیریت مشاوران مدرسه">
-        <div className="mb-3 flex justify-end">
-          <Button variant="outline" onClick={() => { setEditCon(null); reset(); setShowAdd(true); }}><UserPlus size={14} /> افزودن مشاور</Button>
-        </div>
+      <PageHeader title="مشاوران" subtitle={`${faNum(rows.length)} مشاور — مدیریت مشاوران مدرسه`}
+        actions={<Button variant="outline" onClick={() => { setEditCon(null); reset(); setShowAdd(true); }}><UserPlus size={14} /> افزودن مشاور</Button>}
+      />
+      <Card title={`مشاوران (${faNum(rows.length)})`}>
         <div className="space-y-2">
           {rows.map((c) => (
             <div key={c.id} className="flex items-center gap-3 rounded-xl border border-slate-700/40 bg-[#0b1222] px-3 py-2.5">
