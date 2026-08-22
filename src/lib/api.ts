@@ -899,6 +899,114 @@ export function addLesson(name: string, importance: number): void {
 }
 
 export async function loadDemoData(): Promise<void> {
+  const studentsFile = readDb<StudentsFile>("students");
+  const teachersFile = readDb<TeachersFile>("teachers");
+
+  /* If no students or teachers exist, create everything from scratch */
+  if (studentsFile.students.length === 0 || teachersFile.teachers.length === 0) {
+    /* grades + classes */
+    const gradeNames = ["پایه هفتم", "پایه هشتم", "پایه نهم"];
+    const classNames = [["الف", "ب"], ["الف", "ب"], ["الف", "ب"]];
+    const grades = gradeNames.map((name) => ({ id: nextId("gr"), name }));
+    const classIdsByGrade: string[][] = grades.map((_g, gi) =>
+      classNames[gi].map((_name, ci) => nextId(`cl-${gi}-${ci}`)),
+    );
+    const classesFinal: { id: string; name: string; gradeId: string }[] = [];
+    grades.forEach((g, gi) => {
+      classNames[gi].forEach((name, ci) => {
+        classesFinal.push({ id: classIdsByGrade[gi][ci], name, gradeId: g.id });
+      });
+    });
+    writeDb<GradesFile>("grades", { grades, classes: classesFinal, exams: [], examScores: [] });
+
+    /* lessons */
+    const lessons = DEFAULT_LESSONS.map((l) => ({ id: nextId("ls"), name: l.name, importance: clampInt(l.importance, 3, 10) }));
+    writeDb<BooksFile>("books", { lessons });
+
+    /* teacher */
+    const teacherPassword = "teacher123";
+    const tHash = await hashPassword(teacherPassword);
+    const teacher: Teacher = {
+      id: nextId("tch"),
+      role: "teacher",
+      fullName: "علی محمدی",
+      username: "teacher1",
+      passwordHash: tHash.hash,
+      salt: tHash.salt,
+      accessCode: generateAccessCode("teacher"),
+      createdAt: new Date().toISOString(),
+      assignments: lessons.flatMap((l) =>
+        grades.map((g) => ({ lessonId: l.id, gradeId: g.id, classId: classIdsByGrade[grades.indexOf(g)][0] })),
+      ),
+    };
+    writeDb<TeachersFile>("teachers", { teachers: [teacher] });
+
+    /* 15 students + auto parent accounts */
+    const studentNames = [
+      { fullName: "امیر حسینی", username: "amir_h", fatherName: "رضا حسینی", motherName: "سارا احمدی" },
+      { fullName: "زهرا کریمی", username: "zahra_k", fatherName: "محمد کریمی", motherName: "فاطمه رضایی" },
+      { fullName: "حسن رضایی", username: "hasan_r", fatherName: "علی رضایی", motherName: "مریم محمدی" },
+      { fullName: "نیلوفر احمدی", username: "niloofar_a", fatherName: "حسین احمدی", motherName: "زینب عسکری" },
+      { fullName: "محمد جعفری", username: "mohammad_j", fatherName: "اسماعیل جعفری", motherName: "حلیه نوری" },
+      { fullName: "سارا عباسی", username: "sara_a", fatherName: "مهدی عباسی", motherName: "نسرین قاسمی" },
+      { fullName: "رضا نوری", username: "reza_n", fatherName: "فرامرز نوری", motherName: "لیلا شریفی" },
+      { fullName: "مریم حیدری", username: "maryam_h", fatherName: "مرتضی حیدری", motherName: "سمیه کاظمی" },
+      { fullName: "علی فتحی", username: "ali_f", fatherName: "جواد فتحی", motherName: "اکرم مهدوی" },
+      { fullName: "فاطمه رستمی", username: "fateme_r", fatherName: "یدالله رستمی", motherName: "نسرین تقوی" },
+      { fullName: "امیررضا کاظمی", username: "amirreza_k", fatherName: "حسن کاظمی", motherName: "هدیه سلطانی" },
+      { fullName: "ریحانه مهدی‌پور", username: "reyhaneh_m", fatherName: "محسن مهدی‌پور", motherName: "مهناز بهرامی" },
+      { fullName: "امیر علی‌پور", username: "amir_a", fatherName: "فرزاد علی‌پور", motherName: "فرزانه خدایی" },
+      { fullName: "نگین صادقی", username: "negin_s", fatherName: "حسن صادقی", motherName: "شیرین پورمحمدی" },
+      { fullName: "مهدی شریفی", username: "mehdi_sh", fatherName: "رضا شریفی", motherName: "زهرا عطایی" },
+    ];
+
+    const demoPassword = "demo1234";
+    const newStudentsFile: StudentsFile = { students: [], attendance: [], homeworks: [], homeworkSubmissions: [], behaviorReports: [] };
+    const newParentsFile: ParentsFile = { parents: [] };
+
+    for (let idx = 0; idx < studentNames.length; idx++) {
+      const s = studentNames[idx];
+      const gradeIdx = idx < 5 ? 0 : idx < 10 ? 1 : 2;
+      const classIdx = idx % 2;
+      const stHash = await hashPassword(demoPassword);
+      const parHash = await hashPassword(demoPassword);
+      const stId = nextId("st");
+      const parId = nextId("par");
+      const student: Student = {
+        id: stId,
+        role: "student",
+        fullName: s.fullName,
+        username: s.username,
+        passwordHash: stHash.hash,
+        salt: stHash.salt,
+        accessCode: generateAccessCode("student"),
+        createdAt: new Date().toISOString(),
+        gradeId: grades[gradeIdx].id,
+        classId: classIdsByGrade[gradeIdx][classIdx],
+        fatherName: s.fatherName,
+        motherName: s.motherName,
+        phone: "",
+        emergencyPhone: "",
+        parentUserId: parId,
+      };
+      const parent: Parent = {
+        id: parId,
+        role: "parent",
+        fullName: s.fatherName ? `${s.fatherName} (والدین)` : "والدین",
+        username: `parent_${s.username}`,
+        passwordHash: parHash.hash,
+        salt: parHash.salt,
+        accessCode: generateAccessCode("parent"),
+        createdAt: new Date().toISOString(),
+        studentId: stId,
+      };
+      newStudentsFile.students.push(student);
+      newParentsFile.parents.push(parent);
+    }
+    writeDb<StudentsFile>("students", newStudentsFile);
+    writeDb<ParentsFile>("parents", newParentsFile);
+  }
+
   seedDemo();
   recompute();
   logActivity("admin", "مدیر", "دادههای نمونه بارگذاری شد");

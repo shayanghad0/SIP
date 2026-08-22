@@ -106,6 +106,8 @@ function Overview({ onOpenReport }: { onOpenReport: (id: string) => void }) {
                 await loadDemoData();
                 setDemoLoading(false);
                 notify.success("داده‌های نمونه بارگذاری شد");
+                notify.info("دبیر: teacher1 / رمز: teacher123");
+                notify.info("دانش‌آموزان: نام کاربری هر دانش‌آموز / رمز: demo1234");
                 adminOverview().then(setData);
               }}
             >
