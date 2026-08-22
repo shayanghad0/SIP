@@ -196,24 +196,26 @@ export async function install(payload: InstallPayload): Promise<InstallResult> {
     const parentPassword = payload.admin.password;
     const stHash = await hashPassword(s.password);
     const parHash = await hashPassword(parentPassword);
-    const st: Student = {
-      id: nextId("st"),
-      role: "student",
-      fullName: s.fullName,
-      username: s.username,
-      passwordHash: stHash.hash,
-      salt: stHash.salt,
-      accessCode: generateAccessCode("student"),
-      createdAt: new Date().toISOString(),
-      gradeId: grades[s.gradeIdx].id,
-      classId: classIdsByGrade[s.gradeIdx][s.classIdx] ?? classIdsByGrade[s.gradeIdx][0],
-      nationalId: s.nationalId || undefined,
-      fatherName: s.fatherName,
-      motherName: s.motherName,
-      phone: s.phone,
-      emergencyPhone: s.emergencyPhone,
-      parentUserId: nextId("par"),
-    };
+     const st: Student = {
+       id: nextId("st"),
+       role: "student",
+       fullName: s.fullName,
+       username: s.username,
+       passwordHash: stHash.hash,
+       salt: stHash.salt,
+       accessCode: generateAccessCode("student"),
+       createdAt: new Date().toISOString(),
+       gradeId: grades[s.gradeIdx].id,
+       classId: classIdsByGrade[s.gradeIdx][s.classIdx] ?? classIdsByGrade[s.gradeIdx][0],
+       nationalId: s.nationalId || undefined,
+       fatherName: s.fatherName,
+       motherName: s.motherName,
+       phone: s.phone,
+       emergencyPhone: s.emergencyPhone,
+       fatherPhone: s.fatherPhone || undefined,
+       motherPhone: s.motherPhone || undefined,
+       parentUserId: nextId("par"),
+     };
     const par: Parent = {
       id: st.parentUserId,
       role: "parent",
@@ -1054,6 +1056,8 @@ export async function addStudentRecord(payload: {
   motherName?: string;
   phone?: string;
   emergencyPhone?: string;
+  fatherPhone?: string;
+  motherPhone?: string;
 }): Promise<{ student: Student; parent: Parent; parentPassword: string }> {
   const studentsFile = readDb<StudentsFile>("students");
   const parentsFile = readDb<ParentsFile>("parents");
@@ -1080,6 +1084,8 @@ export async function addStudentRecord(payload: {
     motherName: payload.motherName || "",
     phone: payload.phone || "",
     emergencyPhone: payload.emergencyPhone || "",
+    fatherPhone: payload.fatherPhone || undefined,
+    motherPhone: payload.motherPhone || undefined,
     parentUserId: parId,
   };
   const parentUsername = `parent_${payload.username.trim()}`;
@@ -1112,6 +1118,8 @@ export async function updateStudentRecord(studentId: string, payload: {
   motherName?: string;
   phone?: string;
   emergencyPhone?: string;
+  fatherPhone?: string;
+  motherPhone?: string;
 }): Promise<void> {
   const studentsFile = readDb<StudentsFile>("students");
   const parentsFile = readDb<ParentsFile>("parents");
@@ -1143,6 +1151,8 @@ export async function updateStudentRecord(studentId: string, payload: {
     motherName: payload.motherName ?? student.motherName,
     phone: payload.phone ?? student.phone,
     emergencyPhone: payload.emergencyPhone ?? student.emergencyPhone,
+    fatherPhone: payload.fatherPhone ?? student.fatherPhone,
+    motherPhone: payload.motherPhone ?? student.motherPhone,
   };
   // Update parent's username if student username changed
   if (payload.username) {

@@ -108,10 +108,10 @@ const STEP_GUIDES: Record<string, { title: string; what: string; why: string; ho
     how: ["نام و نام خانوادگی مشاور/ناظم را وارد کنید", "یک نام کاربری منحصر به فرد انتخاب کنید", "رمز عبور قوی وارد کنید", "می‌توانید چندین مشاور/ناظم اضافه کنید", "این مرحله اختیاری است — با زدن «رد کردن» می‌توانید از آن عبور کنید"],
   },
   students: {
-    title: "دانش‌آموزان",
-    what: "دانش‌آموزان مدرسه را یکی‌یکی اضافه می‌کنید و هر کدام را به یک پایه و کلاس اختصاص می‌دهید. این مرحله اختیاری است.",
-    why: "برای هر دانش‌آموز به‌صورت خودکار حساب والدین نیز ساخته می‌شود. دانش‌آموزان واحد اصلی سامانه هستند — نمرات، حضور و غیاب، تکالیف و تحلیل ریسک برای آن‌ها ثبت می‌شود. اگر فعلاً دانش‌آموزی ندارید، می‌توانید این مرحله را رد کنید.",
-    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور را وارد کنید", "پایه و کلاس مربوطه را انتخاب کنید", "اطلاعات اختیاری (کد ملی، نام پدر و مادر، تلفن) را پر کنید", "برای تولید رمز تصادفی روی «رمز تصادفی» کلیک کنید", "این مرحله اختیاری است — می‌توانید آن را رد کنید"],
+    title: "دانشآموزان",
+    what: "دانشآموزان مدرسه را یکییکی اضافه میکنید و هر کدام را به یک پایه و کلاس اختصاص میدهید. این مرحله اختیاری است.",
+    why: "برای هر دانشآموز بهصورت خودکار حساب والدین نیز ساخته میشود. دانشآموزان واحد اصلی سامانه هستند — نمرات، حضور و غیاب، تکالیف و تحلیل ریسک برای آنها ثبت میشود. اگر فعلاً دانشآموزی ندارید، میتوانید این مرحله را رد کنید.",
+    how: ["نام و نام خانوادگی، نام کاربری و رمز عبور را وارد کنید", "پایه و کلاس مربوطه را انتخاب کنید", "اطلاعات اختیاری (کد ملی، نام پدر و مادر، تلفن، شماره همراه پدر و مادر) را پر کنید", "برای تولید رمز تصادفی روی «رمز تصادفی» کلیک کنید", "این مرحله اختیاری است — میتوانید آن را رد کنید"],
   },
   teachers: {
     title: "دبیران",
@@ -811,7 +811,7 @@ function StepStudents({
   takenUsernames: string[];
   onSkip: () => void;
 }) {
-  const [form, setForm] = useState({ fullName: "", username: "", password: "", gradeIdx: 0, classIdx: 0, nationalId: "", fatherName: "", motherName: "", phone: "", emergencyPhone: "" });
+  const [form, setForm] = useState({ fullName: "", username: "", password: "", gradeIdx: 0, classIdx: 0, nationalId: "", fatherName: "", motherName: "", phone: "", emergencyPhone: "", fatherPhone: "", motherPhone: "" });
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<typeof form>({ defaultValues: form });
   const selGrade = Number(watch("gradeIdx") ?? 0);
   const pwdValue = watch("password");
@@ -829,10 +829,10 @@ function StepStudents({
           if (!v.fullName.trim() || !v.username.trim()) return notify.error("نام و نام کاربری الزامی است");
           if (validatePassword(v.password)) return notify.error("رمز عبور ضعیف است");
           if (takenUsernames.some((u) => u.toLowerCase() === v.username.toLowerCase())) return notify.error("این نام کاربری قبلاً استفاده شده است");
-          setItems([
-            ...items,
-            { fullName: v.fullName.trim(), username: v.username.trim(), password: v.password, gradeIdx: Number(v.gradeIdx), classIdx: Number(v.classIdx), nationalId: v.nationalId, fatherName: v.fatherName, motherName: v.motherName, phone: v.phone, emergencyPhone: v.emergencyPhone },
-          ]);
+           setItems([
+             ...items,
+             { fullName: v.fullName.trim(), username: v.username.trim(), password: v.password, gradeIdx: Number(v.gradeIdx), classIdx: Number(v.classIdx), nationalId: v.nationalId, fatherName: v.fatherName, motherName: v.motherName, phone: v.phone, emergencyPhone: v.emergencyPhone, fatherPhone: v.fatherPhone, motherPhone: v.motherPhone },
+           ]);
           reset({ ...form });
         })}
         className="mb-4 grid gap-3 rounded-xl border border-slate-700/50 bg-[#0b1222] p-4 sm:grid-cols-3"
@@ -878,6 +878,12 @@ function StepStudents({
         </Field>
         <Field label="تلفن اضطراری">
           <Input dir="ltr" {...register("emergencyPhone")} />
+        </Field>
+        <Field label="شماره تلفن همراه پدر">
+          <Input dir="ltr" {...register("fatherPhone")} />
+        </Field>
+        <Field label="شماره تلفن همراه مادر">
+          <Input dir="ltr" {...register("motherPhone")} />
         </Field>
         <div className="flex items-end gap-2">
           <Button type="submit" className="flex-1">

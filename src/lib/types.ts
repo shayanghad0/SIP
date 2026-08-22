@@ -34,6 +34,8 @@ export interface Student extends UserBase {
   motherName: string;
   phone: string;
   emergencyPhone: string;
+  fatherPhone?: string;
+  motherPhone?: string;
   parentUserId: string;
 }
 
@@ -338,6 +340,8 @@ export interface InstallStudent {
   motherName: string;
   phone: string;
   emergencyPhone: string;
+  fatherPhone?: string;
+  motherPhone?: string;
 }
 export interface InstallAssignment {
   lessonIdx: number;

@@ -253,6 +253,8 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
       motherName: "",
       phone: "",
       emergencyPhone: "",
+      fatherPhone: "",
+      motherPhone: "",
     }
   });
   const [q, setQ] = useState("");
@@ -273,6 +275,8 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
       setValue("motherName", editStudent.motherName || "");
       setValue("phone", editStudent.phone || "");
       setValue("emergencyPhone", editStudent.emergencyPhone || "");
+      setValue("fatherPhone", editStudent.fatherPhone || "");
+      setValue("motherPhone", editStudent.motherPhone || "");
       setShowAdd(true);
     }
   }, [editStudent, setValue]);
@@ -291,8 +295,10 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
           motherName: v.motherName,
           phone: v.phone,
           emergencyPhone: v.emergencyPhone,
+          fatherPhone: v.fatherPhone,
+          motherPhone: v.motherPhone,
         });
-        notify.success("اطلاعات دانش‌آموز به‌روزرسانی شد");
+        notify.success("اطلاعات دانشآموز بهروزرسانی شد");
         setEditStudent(null);
       } else {
         const res = await addStudentRecord({
@@ -306,9 +312,11 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
           motherName: v.motherName,
           phone: v.phone,
           emergencyPhone: v.emergencyPhone,
+          fatherPhone: v.fatherPhone,
+          motherPhone: v.motherPhone,
         });
-        notify.success("دانش‌آموز اضافه شد — حساب والدین نیز ساخته شد");
-        notify.info(`حساب والد: ${res.parent.username} — رمز عبور همان رمز دانش‌آموز است`);
+        notify.success("دانشآموز اضافه شد — حساب والدین نیز ساخته شد");
+        notify.info(`حساب والد: ${res.parent.username} — رمز عبور همان رمز دانشآموز است`);
       }
       setShowAdd(false);
       reset();
@@ -410,6 +418,8 @@ function Students({ onOpenReport }: { onOpenReport: (id: string) => void }) {
             <Field label="نام مادر"><Input {...register("motherName")} /></Field>
             <Field label="تلفن"><Input dir="ltr" {...register("phone")} /></Field>
             <Field label="تلفن اضطراری"><Input dir="ltr" {...register("emergencyPhone")} /></Field>
+            <Field label="شماره تلفن همراه پدر"><Input dir="ltr" {...register("fatherPhone")} /></Field>
+            <Field label="شماره تلفن همراه مادر"><Input dir="ltr" {...register("motherPhone")} /></Field>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => { setShowAdd(false); setEditStudent(null); reset(); }}>انصراف</Button>
