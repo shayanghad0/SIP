@@ -10,9 +10,9 @@ import { PlanView, StudyPlanGrid, TrendLine, COLORS } from "./shared";
 
 const NAV: NavItem[] = [
   { key: "overview", label: "نمای کلی", icon: Home },
-  { key: "progress", label: "پیشرفت تحصیلی", icon: LineChartIcon },
-  { key: "homeworks", label: "تکالیف", icon: ClipboardList },
   { key: "attendance", label: "حضور و غیاب", icon: CalendarCheck },
+  { key: "homeworks", label: "تکالیف", icon: ClipboardList },
+  { key: "progress", label: "پیشرفت تحصیلی", icon: LineChartIcon },
   { key: "advice", label: "توصیه‌های هوشمند", icon: Lightbulb },
 ];
 
